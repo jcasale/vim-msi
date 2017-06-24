@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+<Product Id="*"
+         Name="Vim"
+         Language="1033"
+         Version="$(var.ProductVersion)"
+         Manufacturer="http://www.vim.org/"
+         UpgradeCode="12b27f7b-6f45-4b2c-87ed-61c5008d643b">
+    <Package InstallerVersion="200"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Platform="x64"
+             InstallPrivileges="elevated"
+             Description="Vim is an advanced text editor that seeks to provide the power of the de-facto Unix editor 'Vi', with a more complete feature set."
+             Comments="Vim v$(var.ProductVersion)" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <Media Id="1" Cabinet="Data.cab" EmbedCab="yes" CompressionLevel="high" />
+
+    <SetProperty Id="OleRegister"
+                 Before="OleRegister"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -silent -register"><![CDATA[NOT Installed]]></SetProperty>
+    <CustomAction Id="OleRegister"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
+    <SetProperty Id="OleRegisterRollback"
+                 Before="OleRegisterRollback"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -silent -unregister"><![CDATA[Installed]]></SetProperty>
+    <CustomAction Id="OleRegisterRollback"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="rollback"
+                  Return="ignore"
+                  Impersonate="no" />
+
+    <SetProperty Id="OleUnRegister"
+                 Before="OleUnRegister"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -silent -unregister"><![CDATA[Installed]]></SetProperty>
+    <CustomAction Id="OleUnRegister"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+
+    <InstallExecuteSequence>
+      <Custom Action="OleRegister" After="InstallFiles"><![CDATA[NOT Installed]]></Custom>
+      <Custom Action="OleRegisterRollback" After="InstallFiles"><![CDATA[NOT Installed]]></Custom>
+      <Custom Action="OleUnRegister" Before="RemoveFiles"><![CDATA[Installed]]></Custom>
+    </InstallExecuteSequence>
+
+    <Feature Id="Product"
+             Absent="disallow"
+             ConfigurableDirectory="INSTALLDIR"
+             Description="Vim/Gvim binaries."
+             Display="expand"
+             Title="Vim for Windows">
+      <ComponentGroupRef Id="ProductComponents" />
+      <Feature Id="ShellIntegration"
+               Description="Adds Vim to the &quot;Open With...&quot; list and installs an entry in the popup menu for the right mouse button so that you can edit any file with Vim."
+               Title="Shell Integration">
+        <ComponentRef Id="RegistryComponent" />
+      </Feature>
+      <Feature Id="DesktopShortcuts"
+               Description="Create desktop icons for gVim."
+               Level="10"
+               Title="Desktop Shortcuts">
+        <ComponentRef Id="DesktopShortcutsComponent" />
+      </Feature>
+      <Feature Id="StartMenuShortcuts"
+               Description="Add Vim to the Start menu."
+               Title="Start Menu Shortcuts">
+        <ComponentRef Id="StartMenuShortcutsComponent" />
+      </Feature>
+      <Feature Id="DefaultVimrc"
+               Description="Remap a few keys for Windows behavior (&lt;C-V&gt;, &lt;C-C&gt;, etc)."
+               Title="Default vimrc">
+        <ComponentRef Id="DefaultVimrcComponent" />
+      </Feature>
+    </Feature>
+
+    <Property Id="HomeDrivePath" Value="%HOMEDRIVE%%HOMEPATH%" />
+    <Property Id="Url" Value="http://vim.sf.net" />
+    <Icon Id="gvim" SourceFile="$(var.VimSource)\gvim.exe" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    <UI>
+      <UIRef Id="WixUI_FeatureTree" />
+      <Publish Dialog="WelcomeDlg"
+               Control="Next"
+               Event="NewDialog"
+               Value="CustomizeDlg"
+               Order="2">NOT Installed</Publish>
+      <Publish Dialog="CustomizeDlg"
+               Control="Back"
+               Event="NewDialog"
+               Value="WelcomeDlg"
+               Order="3">NOT Installed</Publish>
+    </UI>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="DesktopFolder" SourceName="Desktop" />
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="Vim" Name="vim" >
+          <Directory Id="INSTALLDIR" Name="vim80" />
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ProgramMenuFolderApplication" Name="Vim 8.0" />
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="Vim">
+      <Component Id="DefaultVimrcComponent" Guid="*">
+          <File Id="vimrc"
+                Source="$(var.ResourceDir)\_vimrc"
+                KeyPath="yes"
+                Checksum="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="DesktopShortcutsComponent" Guid="*">
+        <Shortcut Id="DesktopShortcutsComponent.gVim"
+                  Name="gVim 8.0"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]gvim.exe"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="DesktopShortcutsComponent.gVim.Easy"
+                  Name="gVim Easy 8.0"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]gvim.exe"
+                  Arguments="-y"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="DesktopShortcutsComponent.gVim.ReadOnly"
+                  Name="gVim Read only 8.0"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]gvim.exe"
+                  Arguments="-R"
+                  WorkingDirectory="HomeDrivePath" />
+        <RegistryValue Root="HKCU"
+                       Key="Software\[Manufacturer]\[ProductName] [ProductVersion]"
+                       Name="DesktopShortcutsComponent"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="ProgramMenuFolderApplication">
+      <Component Id="StartMenuShortcutsComponent" Guid="*">
+        <Shortcut Id="StartMenuShortcutsComponent.gVim.Diff"
+                  Name="gVim Diff"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]gvim.exe"
+                  Arguments="-d"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="StartMenuShortcutsComponent.gVim.Easy"
+                  Name="gVim Easy"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]gvim.exe"
+                  Arguments="-y"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="StartMenuShortcutsComponent.gVim.ReadOnly"
+                  Name="gVim Read-only"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]gvim.exe"
+                  Arguments="-R"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="StartMenuShortcutsComponent.gVim"
+                  Name="gVim"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]gvim.exe"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="StartMenuShortcutsComponent.gVim.Help"
+                  Name="gVim Help"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]gvim.exe"
+                  Arguments="-c H"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="StartMenuShortcutsComponent.Vim.Diff"
+                  Name="Vim Diff"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]vim.exe"
+                  Arguments="-d"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="StartMenuShortcutsComponent.Vim.Tutor"
+                  Name="Vim tutor"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]vimtutor.bat"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="StartMenuShortcutsComponent.Vim"
+                  Name="Vim"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]vim.exe"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="StartMenuShortcutsComponent.Vim.ReadOnly"
+                  Name="Vim Read-only"
+                  Description="Vi Improved - A Text Editor"
+                  Target="[INSTALLDIR]vim.exe"
+                  Arguments="-R"
+                  WorkingDirectory="HomeDrivePath" />
+        <Shortcut Id="StartMenuShortcutsComponent.OnlineDocumentation"
+                  Name="Vim Online"
+                  Description="Vim Online Documentation"
+                  Icon="gvim"
+                  Target="[Url]" />
+        <RemoveFolder Id="ProgramMenuFolderApplication" On="uninstall" />
+        <RegistryValue Root="HKCU"
+                       Key="Software\[Name]\[ProductName] [ProductVersion]"
+                       Name="StartMenuShortcutsComponent"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="RegistryComponent" Guid="1096A971-8841-432E-9346-B71D1731D51A" KeyPath="yes">
+        <RegistryKey Id='Registry.Entry.Clsid.default'
+                     Root='HKCR'
+                     Key='CLSID\{51EEE242-AD87-11d3-9C1E-0090278BBD99}'
+                     ForceCreateOnInstall='yes'
+                     ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Value='Vim Shell Extension' />
+        </RegistryKey>
+        <RegistryKey Id='Registry.Entry.Clsid.InProcServer32'
+                     Root='HKCR'
+                     Key='CLSID\{51EEE242-AD87-11d3-9C1E-0090278BBD99}\InProcServer32'
+                     ForceCreateOnInstall='yes'
+                     ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type="string" Value="[INSTALLDIR]gvimext\gvimext.dll" />
+          <RegistryValue Type='string' Name='ThreadingModel' Value='Apartment' />
+        </RegistryKey>
+        <RegistryKey Id='Registry.Entry.ShellEx.ContextMenuHandlers'
+                     Root='HKCR'
+                     Key='*\shellex\ContextMenuHandlers\gvim'
+                     ForceCreateOnInstall='yes'
+                     ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Value='{51EEE242-AD87-11d3-9C1E-0090278BBD99}' />
+        </RegistryKey>
+        <RegistryKey Id='Registry.Entry.ShellExtensions.Approved'
+                     Root='HKLM'
+                     Key='SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved'
+                     ForceCreateOnInstall='yes'
+                     ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Name='{51EEE242-AD87-11d3-9C1E-0090278BBD99}' Value='Vim Shell Extension' />
+        </RegistryKey>
+        <RegistryKey Id='Registry.Entry.Clsid.Software'
+                     Root='HKLM'
+                     Key='SOFTWARE\Vim\Gvim'
+                     ForceCreateOnInstall='yes'
+                     ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Name='path' Value='[INSTALLDIR]gvim.exe' />
+        </RegistryKey>
+
+        <RegistryKey Id='Registry.Open.With'
+                     Root='HKCR'
+                     Key='*\OpenWithList\gvim.exe'
+                     ForceCreateOnInstall='yes'
+                     ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Value='' />
+        </RegistryKey>
+        <RegistryKey Id='Registry.Entry.EditCommand'
+                     Root='HKCR'
+                     Key='Applications\gvim.exe\shell\edit\command'
+                     ForceCreateOnInstall='yes'
+                     ForceDeleteOnUninstall='yes'>
+          <RegistryValue Type='string' Value='"[INSTALLDIR]gvim.exe" "%1"' />
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>
