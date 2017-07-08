@@ -866,6 +866,9 @@
                 <Component Id="cmpCC08CF246D26FDE8BE71B17DE1CEB058" Guid="*">
                     <File Id="fil40250491732C2F8CFE612F40F8EBF1AE" KeyPath="yes" Source="$(var.VimSource)\doc\term.txt" />
                 </Component>
+                <Component Id="cmp2C7A07F19B743FF1BC3FD53611A656B2" Guid="*">
+                    <File Id="fil5AA5654185A19A641D07EBF931BA9EBA" KeyPath="yes" Source="$(var.VimSource)\doc\terminal.txt" />
+                </Component>
                 <Component Id="cmp589D892F19F2D8CF0AFB1C1592AFA6A2" Guid="*">
                     <File Id="fil092EE378CC9F056EAE4C82A056D29987" KeyPath="yes" Source="$(var.VimSource)\doc\tips.txt" />
                 </Component>
@@ -6247,6 +6250,7 @@
             <ComponentRef Id="cmp043E4EE46F8295C585847C1233BE7251" />
             <ComponentRef Id="cmp349079A219EB56242352B07FF08DBB2A" />
             <ComponentRef Id="cmpCC08CF246D26FDE8BE71B17DE1CEB058" />
+            <ComponentRef Id="cmp2C7A07F19B743FF1BC3FD53611A656B2" />
             <ComponentRef Id="cmp589D892F19F2D8CF0AFB1C1592AFA6A2" />
             <ComponentRef Id="cmp021E91CB247A2C7DA410C33EA3EDD143" />
             <ComponentRef Id="cmp945FEE0D3A551CB9456BE2674DB2AF23" />
