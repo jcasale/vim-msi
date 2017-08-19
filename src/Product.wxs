@@ -104,6 +104,7 @@
                Value="WelcomeDlg"
                Order="3">NOT Installed</Publish>
     </UI>
+    <UIRef Id="WixUI_ErrorProgressText" />
   </Product>
 
   <Fragment>
