@@ -155,6 +155,12 @@
             <Component Id="cmpD6D761499DDEC4F634CC2128BBB5637F" Guid="*">
                 <File Id="filA16A324FC54BF622D1DDE971ACC96091" KeyPath="yes" Source="$(var.VimSource)\vimtutor.bat" />
             </Component>
+            <Component Id="cmp8FB79CD6D8EA5191D6CC05CD84E6E3CD" Guid="*">
+                <File Id="fil19801B582B6A732EE57BE6DC97726DEF" KeyPath="yes" Source="$(var.VimSource)\winpty-agent.exe" />
+            </Component>
+            <Component Id="cmpAA088CA03D27939739EDF40B5DC3AB69" Guid="*">
+                <File Id="fil89DE2863E4DB46DA33FC994789257385" KeyPath="yes" Source="$(var.VimSource)\winpty64.dll" />
+            </Component>
             <Component Id="cmpA40F7F016234622A9D294128CD67545A" Guid="*">
                 <File Id="fil0763EC608E6E7F9A34A92E247E617C9B" KeyPath="yes" Source="$(var.VimSource)\xxd.exe" />
             </Component>
@@ -4867,6 +4873,9 @@
                 <Component Id="cmp0B1335B568D18D0DAEA67345AFEDF4EB" Guid="*">
                     <File Id="fil5F6B6F4735A4198EDCD84703CE79C96D" KeyPath="yes" Source="$(var.VimSource)\syntax\mupad.vim" />
                 </Component>
+                <Component Id="cmpE887260D032E1752E3E787120CF9AC76" Guid="*">
+                    <File Id="fil317C98B7F5A2D02956E6D8A51189D441" KeyPath="yes" Source="$(var.VimSource)\syntax\murphi.vim" />
+                </Component>
                 <Component Id="cmpC67EB76BD94CC84BBB554CFB899C8044" Guid="*">
                     <File Id="filFF92AA8AA73A012CF722236C28C554A5" KeyPath="yes" Source="$(var.VimSource)\syntax\mush.vim" />
                 </Component>
@@ -6016,6 +6025,8 @@
             <ComponentRef Id="cmpF700CFCBDCB20172F290B4F105BC856A" />
             <ComponentRef Id="cmpFFF3E0085A5E8FBD6715A1A7BC0F6C32" />
             <ComponentRef Id="cmpD6D761499DDEC4F634CC2128BBB5637F" />
+            <ComponentRef Id="cmp8FB79CD6D8EA5191D6CC05CD84E6E3CD" />
+            <ComponentRef Id="cmpAA088CA03D27939739EDF40B5DC3AB69" />
             <ComponentRef Id="cmpA40F7F016234622A9D294128CD67545A" />
             <ComponentRef Id="cmp1BDF1361D8675E1AA5A86747EE7815CA" />
             <ComponentRef Id="cmp23A151F40D690673C6BB8832D00F1926" />
@@ -7479,6 +7490,7 @@
             <ComponentRef Id="cmpCAC5A492431164D1376C33828DB77E94" />
             <ComponentRef Id="cmp1440F5207502B1A87E15FEBDFCC75218" />
             <ComponentRef Id="cmp0B1335B568D18D0DAEA67345AFEDF4EB" />
+            <ComponentRef Id="cmpE887260D032E1752E3E787120CF9AC76" />
             <ComponentRef Id="cmpC67EB76BD94CC84BBB554CFB899C8044" />
             <ComponentRef Id="cmp8E6B9C12F6BB6C478ADCA2A15ED5A490" />
             <ComponentRef Id="cmp2CC0337626C152CAA7819F3738E758FE" />
