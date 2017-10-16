@@ -49,7 +49,10 @@ catch
     throw $_
 }
 
-Move-Item (Join-Path $tmpDirectory 'vim\vim80\GvimExt\gvimext64.dll') (Join-Path $tmpDirectory 'vim\vim80\GvimExt\gvimext.dll') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim80\GvimExt32\GvimExt.reg') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim80\GvimExt32\README.txt') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim80\GvimExt64\GvimExt.reg') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim80\GvimExt64\README.txt') -Force -ErrorAction Stop
 Remove-Item (Join-Path $tmpDirectory 'vim\vim80\install.exe') -Force -ErrorAction Stop
 Remove-Item (Join-Path $tmpDirectory 'vim\vim80\uninstal.exe') -Force -ErrorAction Stop
 Remove-Item (Join-Path $tmpDirectory 'vim\vim80\*.desktop') -Force -ErrorAction Stop

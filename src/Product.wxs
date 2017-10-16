@@ -247,7 +247,7 @@
                      Key='CLSID\{51EEE242-AD87-11d3-9C1E-0090278BBD99}\InProcServer32'
                      ForceCreateOnInstall='yes'
                      ForceDeleteOnUninstall='yes'>
-          <RegistryValue Type="string" Value="[INSTALLDIR]gvimext\gvimext.dll" />
+          <RegistryValue Type="string" Value="[INSTALLDIR]GvimExt64\gvimext.dll" />
           <RegistryValue Type='string' Name='ThreadingModel' Value='Apartment' />
         </RegistryKey>
         <RegistryKey Id='Registry.Entry.ShellEx.ContextMenuHandlers'

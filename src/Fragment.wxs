@@ -1793,18 +1793,35 @@
                     <File Id="filBD27F8F3601BDE010A62F96AE573FA0C" KeyPath="yes" Source="$(var.VimSource)\ftplugin\zsh.vim" />
                 </Component>
             </Directory>
-            <Directory Id="dirA25E3E623E6B5DBF5B82DEABF22F7AEC" Name="GvimExt">
-                <Component Id="cmp2BFEB72120775607432EADAE1607607C" Guid="*">
-                    <File Id="fil6F63C9D38854C880EF69A549AC817B36" KeyPath="yes" Source="$(var.VimSource)\GvimExt\gvimext.dll" />
+            <Directory Id="dir8DE2199C1AFBAC3E81B518F56AE98602" Name="GvimExt32">
+                <Component Id="cmpC3FD49860837F8B97B8AA4FC538B2631" Guid="*">
+                    <File Id="filFDF03A9FCA33346BFF13EC328052C1D7" KeyPath="yes" Source="$(var.VimSource)\GvimExt32\gvimext.dll" />
                 </Component>
-                <Component Id="cmp493242242BD05B06CD4CA898FC2784EE" Guid="*">
-                    <File Id="fil9844BBE746257C0877913747371EE11E" KeyPath="yes" Source="$(var.VimSource)\GvimExt\gvimext.inf" />
+                <Component Id="cmp0F4E419984EEEDA07EA930D2CAEF2BAC" Guid="*">
+                    <File Id="fil8A102C963EA4F589E7E34C9DF1C48C89" KeyPath="yes" Source="$(var.VimSource)\GvimExt32\gvimext.inf" />
                 </Component>
-                <Component Id="cmp1F0BD81FCD0BA876A60C246AD7465298" Guid="*">
-                    <File Id="fil5B90528FF00AFCDA741DCE5B8D63B90E" KeyPath="yes" Source="$(var.VimSource)\GvimExt\GvimExt.reg" />
+                <Component Id="cmp695F7BA1B514D2B0A26103ABA7C2EBB4" Guid="*">
+                    <File Id="fil167CE5E8B3375EAD81B1A175A0565ED7" KeyPath="yes" Source="$(var.VimSource)\GvimExt32\libgcc_s_sjlj-1.dll" />
                 </Component>
-                <Component Id="cmpADDF8B8F7575B780286B8AC3F83232FE" Guid="*">
-                    <File Id="fil0EDD4E8218B97C846F158A8EB9C70ACB" KeyPath="yes" Source="$(var.VimSource)\GvimExt\README.txt" />
+                <Component Id="cmpCED7C72F4CE397A59527EA375E7E2E68" Guid="*">
+                    <File Id="filBF32AE212D3FC57F7802AB6DC566F808" KeyPath="yes" Source="$(var.VimSource)\GvimExt32\libiconv-2.dll" />
+                </Component>
+                <Component Id="cmp813C331094346E05C667CB0899111E28" Guid="*">
+                    <File Id="filD47C4A1A665A1527E521A04B029061D7" KeyPath="yes" Source="$(var.VimSource)\GvimExt32\libintl-8.dll" />
+                </Component>
+            </Directory>
+            <Directory Id="dir47CB88EEFB516A90FAD56807FD22C58C" Name="GvimExt64">
+                <Component Id="cmp7DCAFB70C0F9C0A1F552125475CE42D0" Guid="*">
+                    <File Id="fil450673C74C2DDC2C137CCA58AC72BA02" KeyPath="yes" Source="$(var.VimSource)\GvimExt64\gvimext.dll" />
+                </Component>
+                <Component Id="cmpFCFBFD0A8244133ACBCD97B1C16389E2" Guid="*">
+                    <File Id="fil0965DF5AACD697927E43E4902FCF5EFD" KeyPath="yes" Source="$(var.VimSource)\GvimExt64\gvimext.inf" />
+                </Component>
+                <Component Id="cmpB22E6717E7C97929E1EEED0259CF2BCB" Guid="*">
+                    <File Id="fil2F3E2BD5C7A6632A30C8A4136E7DF235" KeyPath="yes" Source="$(var.VimSource)\GvimExt64\libiconv-2.dll" />
+                </Component>
+                <Component Id="cmp687C165C5A67191224EE2F8FDD0FFD39" Guid="*">
+                    <File Id="fil3E7F816EABD0452243A5D3B2A3BDCD5A" KeyPath="yes" Source="$(var.VimSource)\GvimExt64\libintl-8.dll" />
                 </Component>
             </Directory>
             <Directory Id="dirFA27E2CE6628A960529D14CCB96B54D2" Name="icons">
@@ -3258,6 +3275,13 @@
                             <Directory Id="dir9DCF01B08A6071131871E35BB35AA753" Name="plugin">
                                 <Component Id="cmpC4FB6BBC5A092471E5B79EBBED924B27" Guid="*">
                                     <File Id="filB6A72116EF9132A301D2D0B75B62706C" KeyPath="yes" Source="$(var.VimSource)\pack\dist\opt\swapmouse\plugin\swapmouse.vim" />
+                                </Component>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="dirBFAE0ACF38A527A2E28989ED047846A4" Name="termdebug">
+                            <Directory Id="dirD3C06AED507F2DE0BE7930CEE50A4668" Name="plugin">
+                                <Component Id="cmpE1D7B9F59A4BD5A66D4687EA92AD0B05" Guid="*">
+                                    <File Id="filA2CB99AB61C45A2C5C6E0FBDDB163FC5" KeyPath="yes" Source="$(var.VimSource)\pack\dist\opt\termdebug\plugin\termdebug.vim" />
                                 </Component>
                             </Directory>
                         </Directory>
@@ -4885,6 +4909,9 @@
                 <Component Id="cmp2CC0337626C152CAA7819F3738E758FE" Guid="*">
                     <File Id="fil3457073422C5634888DB86DAABD77916" KeyPath="yes" Source="$(var.VimSource)\syntax\mysql.vim" />
                 </Component>
+                <Component Id="cmp8E0729747AF7A0C0D8411D35BBF204AF" Guid="*">
+                    <File Id="filD74FC8459793783D68EA457DDB9EFFE2" KeyPath="yes" Source="$(var.VimSource)\syntax\n1ql.vim" />
+                </Component>
                 <Component Id="cmp2CFA0CE5D451844A7A1C65B04ABB2B18" Guid="*">
                     <File Id="fil8768B23236E0CEB1CF3CE161B3A33A9A" KeyPath="yes" Source="$(var.VimSource)\syntax\named.vim" />
                 </Component>
@@ -5428,6 +5455,9 @@
                 <Component Id="cmp7577348B70FED3208E0DA8ED8F9D9D3E" Guid="*">
                     <File Id="fil4A0D5BA5EA9F00F23444A215A53751A7" KeyPath="yes" Source="$(var.VimSource)\syntax\takout.vim" />
                 </Component>
+                <Component Id="cmp6ECAD8A7F0C43EF4642F5D20F863FAAD" Guid="*">
+                    <File Id="filF9011D31079FEA8AFF48959D0959CEF8" KeyPath="yes" Source="$(var.VimSource)\syntax\tap.vim" />
+                </Component>
                 <Component Id="cmpE2FF0DA3DB8315F45AC1F41550D0B2D5" Guid="*">
                     <File Id="filA586766B850BB6B91F1F82BC5565755B" KeyPath="yes" Source="$(var.VimSource)\syntax\tar.vim" />
                 </Component>
@@ -5872,6 +5902,9 @@
                 </Component>
                 <Component Id="cmpBD0219CE93FE482648D5B8FD4C67DF47" Guid="*">
                     <File Id="filE95B33F10A727D45CE11FD0A503B9027" KeyPath="yes" Source="$(var.VimSource)\tutor\tutor.ko.utf-8" />
+                </Component>
+                <Component Id="cmp94BD0D9FCF2CDD1F539742EDEA48C3DB" Guid="*">
+                    <File Id="filE2F57BEBA4CE9E327C3AD5F9089C6EEB" KeyPath="yes" Source="$(var.VimSource)\tutor\tutor.lv" />
                 </Component>
                 <Component Id="cmpE9337BD7CEF7679784D3E95CD38D5564" Guid="*">
                     <File Id="fil984A6A2F399686641BAE859BCCA4BCCA" KeyPath="yes" Source="$(var.VimSource)\tutor\tutor.nb" />
@@ -6567,10 +6600,15 @@
             <ComponentRef Id="cmpB9AF41D6AFA8517A284BFB5F38AA188E" />
             <ComponentRef Id="cmp5EDA865D8426C755AABEC1F53FCA5B41" />
             <ComponentRef Id="cmp2814E536A5FBFFC8440D6A443DF2C7AE" />
-            <ComponentRef Id="cmp2BFEB72120775607432EADAE1607607C" />
-            <ComponentRef Id="cmp493242242BD05B06CD4CA898FC2784EE" />
-            <ComponentRef Id="cmp1F0BD81FCD0BA876A60C246AD7465298" />
-            <ComponentRef Id="cmpADDF8B8F7575B780286B8AC3F83232FE" />
+            <ComponentRef Id="cmpC3FD49860837F8B97B8AA4FC538B2631" />
+            <ComponentRef Id="cmp0F4E419984EEEDA07EA930D2CAEF2BAC" />
+            <ComponentRef Id="cmp695F7BA1B514D2B0A26103ABA7C2EBB4" />
+            <ComponentRef Id="cmpCED7C72F4CE397A59527EA375E7E2E68" />
+            <ComponentRef Id="cmp813C331094346E05C667CB0899111E28" />
+            <ComponentRef Id="cmp7DCAFB70C0F9C0A1F552125475CE42D0" />
+            <ComponentRef Id="cmpFCFBFD0A8244133ACBCD97B1C16389E2" />
+            <ComponentRef Id="cmpB22E6717E7C97929E1EEED0259CF2BCB" />
+            <ComponentRef Id="cmp687C165C5A67191224EE2F8FDD0FFD39" />
             <ComponentRef Id="cmpF4439719B620FC155021E454F03B7101" />
             <ComponentRef Id="cmpFA0EC096466123F7DAEF3B63A89C7E33" />
             <ComponentRef Id="cmp7A243D90B3468521DE2D5604B97AC7F2" />
@@ -6990,6 +7028,7 @@
             <ComponentRef Id="cmp0AE6DCC9DB30312F713C8364BF104559" />
             <ComponentRef Id="cmp6A262DB162D6ADA5B635D0AE1644D997" />
             <ComponentRef Id="cmpC4FB6BBC5A092471E5B79EBBED924B27" />
+            <ComponentRef Id="cmpE1D7B9F59A4BD5A66D4687EA92AD0B05" />
             <ComponentRef Id="cmp222B43214E4D65E4E5A1D4D6D8C1BC48" />
             <ComponentRef Id="cmp58B55FFE01CFD80287956FA94610A67E" />
             <ComponentRef Id="cmp7A4DE09A102CDD63148B044CFF5A7F2B" />
@@ -7494,6 +7533,7 @@
             <ComponentRef Id="cmpC67EB76BD94CC84BBB554CFB899C8044" />
             <ComponentRef Id="cmp8E6B9C12F6BB6C478ADCA2A15ED5A490" />
             <ComponentRef Id="cmp2CC0337626C152CAA7819F3738E758FE" />
+            <ComponentRef Id="cmp8E0729747AF7A0C0D8411D35BBF204AF" />
             <ComponentRef Id="cmp2CFA0CE5D451844A7A1C65B04ABB2B18" />
             <ComponentRef Id="cmp31504847B434CBB37E02F7EC5399DD19" />
             <ComponentRef Id="cmp94F422602B88ABDA0E02C33AEA66B3F6" />
@@ -7675,6 +7715,7 @@
             <ComponentRef Id="cmp7D1F5CDA19D22D48088F87E644410715" />
             <ComponentRef Id="cmp5B2D46A557F1011906D85F9E0402AFB3" />
             <ComponentRef Id="cmp7577348B70FED3208E0DA8ED8F9D9D3E" />
+            <ComponentRef Id="cmp6ECAD8A7F0C43EF4642F5D20F863FAAD" />
             <ComponentRef Id="cmpE2FF0DA3DB8315F45AC1F41550D0B2D5" />
             <ComponentRef Id="cmpBE6DA3A3864D18EF8D886D81E208D763" />
             <ComponentRef Id="cmp9E259CB8934BD4ACF1E9E9B4A6AE687B" />
@@ -7822,6 +7863,7 @@
             <ComponentRef Id="cmp6B055C315A6B0855E76F9EF81827C7D6" />
             <ComponentRef Id="cmp45122BA822DE093B45E193D96033ED46" />
             <ComponentRef Id="cmpBD0219CE93FE482648D5B8FD4C67DF47" />
+            <ComponentRef Id="cmp94BD0D9FCF2CDD1F539742EDEA48C3DB" />
             <ComponentRef Id="cmpE9337BD7CEF7679784D3E95CD38D5564" />
             <ComponentRef Id="cmpB92C4C4DD4A8A3D0ACB3B8C87809404A" />
             <ComponentRef Id="cmpC19EC400A49F50B5EAF88AB00D70FE90" />
