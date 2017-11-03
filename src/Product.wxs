@@ -17,6 +17,77 @@
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <Media Id="1" Cabinet="Data.cab" EmbedCab="yes" CompressionLevel="high" />
 
+    <Icon Id="gvim" SourceFile="$(var.VimSource)\gvim.exe" />
+
+    <Feature Id="Product"
+             Absent="disallow"
+             ConfigurableDirectory="INSTALLDIR"
+             Description="Vim/Gvim binaries."
+             Display="expand"
+             Title="Vim for Windows">
+      <ComponentGroupRef Id="ProductComponents" />
+      <Feature Id="ShellIntegration"
+               Description="Adds Vim to the &quot;Open With...&quot; list and installs an entry in the popup menu for the right mouse button so that you can edit any file with Vim."
+               Title="Shell Integration">
+        <ComponentRef Id="RegistryComponent" />
+      </Feature>
+      <Feature Id="DesktopShortcuts"
+               Description="Create desktop icons for gVim."
+               Level="10"
+               Title="Desktop Shortcuts">
+        <ComponentRef Id="DesktopShortcutsComponent" />
+      </Feature>
+      <Feature Id="StartMenuShortcuts"
+               Description="Add Vim to the Start menu."
+               Title="Start Menu Shortcuts">
+        <ComponentRef Id="StartMenuShortcutsComponent" />
+      </Feature>
+      <Feature Id="DefaultVimrc"
+               Description="Create a default vimrc file."
+               Title="Default vimrc">
+        <ComponentRef Id="DefaultVimrcComponent" />
+      </Feature>
+    </Feature>
+
+    <Property Id="HomeDrivePath" Value="%HOMEDRIVE%%HOMEPATH%" />
+    <Property Id="Url" Value="http://vim.sf.net" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    <Property Id="VIMRC_REMAP" Value="win" />
+    <Property Id="VIMRC_BEHAVIOR" Value="mswin" />
+
+    <Condition Message="The VIMRC_REMAP property must be one of &quot;no&quot; or &quot;win&quot;.">
+      <![CDATA[Installed OR VIMRC_REMAP = "no" OR VIMRC_REMAP = "win"]]>
+    </Condition>
+    <Condition Message="The VIMRC_BEHAVIOR property must be one of &quot;default&quot;, &quot;xterm&quot; or &quot;mswin&quot;.">
+      <![CDATA[Installed OR VIMRC_BEHAVIOR = "default" OR VIMRC_BEHAVIOR = "xterm" OR VIMRC_BEHAVIOR = "mswin"]]>
+    </Condition>
+
+    <SetProperty Id="VimrcBehavior"
+                 Before="VimrcBehavior"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&amp;\rbehave [VIMRC_BEHAVIOR]/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
+      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND (VIMRC_BEHAVIOR = "xterm" OR VIMRC_BEHAVIOR = "mswin")]]>
+    </SetProperty>
+    <CustomAction Id="VimrcBehavior"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
+    <SetProperty Id="VimrcRemap"
+                 Before="VimrcRemap"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&amp;\rsource $VIMRUNTIME\/mswin.vim/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
+      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_REMAP = "win"]]>
+    </SetProperty>
+    <CustomAction Id="VimrcRemap"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
     <SetProperty Id="OleRegister"
                  Before="OleRegister"
                  Sequence="execute"
@@ -51,61 +122,64 @@
                   Impersonate="no" />
 
     <InstallExecuteSequence>
+      <Custom Action="VimrcBehavior" After="InstallFiles"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND (VIMRC_BEHAVIOR = "xterm" OR VIMRC_BEHAVIOR = "mswin")]]></Custom>
+      <Custom Action="VimrcRemap" After="InstallFiles"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_REMAP = "win"]]></Custom>
       <Custom Action="OleRegister" After="InstallFiles"><![CDATA[NOT Installed]]></Custom>
       <Custom Action="OleRegisterRollback" After="InstallFiles"><![CDATA[NOT Installed]]></Custom>
       <Custom Action="OleUnRegister" Before="RemoveFiles"><![CDATA[Installed]]></Custom>
     </InstallExecuteSequence>
 
-    <Feature Id="Product"
-             Absent="disallow"
-             ConfigurableDirectory="INSTALLDIR"
-             Description="Vim/Gvim binaries."
-             Display="expand"
-             Title="Vim for Windows">
-      <ComponentGroupRef Id="ProductComponents" />
-      <Feature Id="ShellIntegration"
-               Description="Adds Vim to the &quot;Open With...&quot; list and installs an entry in the popup menu for the right mouse button so that you can edit any file with Vim."
-               Title="Shell Integration">
-        <ComponentRef Id="RegistryComponent" />
-      </Feature>
-      <Feature Id="DesktopShortcuts"
-               Description="Create desktop icons for gVim."
-               Level="10"
-               Title="Desktop Shortcuts">
-        <ComponentRef Id="DesktopShortcutsComponent" />
-      </Feature>
-      <Feature Id="StartMenuShortcuts"
-               Description="Add Vim to the Start menu."
-               Title="Start Menu Shortcuts">
-        <ComponentRef Id="StartMenuShortcutsComponent" />
-      </Feature>
-      <Feature Id="DefaultVimrc"
-               Description="Remap a few keys for Windows behavior (&lt;C-V&gt;, &lt;C-C&gt;, etc)."
-               Title="Default vimrc">
-        <ComponentRef Id="DefaultVimrcComponent" />
-      </Feature>
-    </Feature>
-
-    <Property Id="HomeDrivePath" Value="%HOMEDRIVE%%HOMEPATH%" />
-    <Property Id="Url" Value="http://vim.sf.net" />
-    <Icon Id="gvim" SourceFile="$(var.VimSource)\gvim.exe" />
-
-    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
     <UI>
       <UIRef Id="WixUI_FeatureTree" />
-      <Publish Dialog="WelcomeDlg"
-               Control="Next"
-               Event="NewDialog"
-               Value="CustomizeDlg"
-               Order="2">NOT Installed</Publish>
-      <Publish Dialog="CustomizeDlg"
-               Control="Back"
-               Event="NewDialog"
-               Value="WelcomeDlg"
-               Order="3">NOT Installed</Publish>
+      <UIRef Id="CustomDlg" />
     </UI>
     <UIRef Id="WixUI_ErrorProgressText" />
   </Product>
+
+  <Fragment>
+    <UI Id="CustomDlg">
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="CustomizeDlg" Order="2">NOT Installed</Publish>
+
+      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="3">NOT Installed</Publish>
+      <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg"><![CDATA[&DefaultVimrc <> 3]]></Publish>
+      <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="VimrcDlg"><![CDATA[&DefaultVimrc = 3]]></Publish>
+
+      <Publish Dialog="VimrcDlg" Control="Back" Event="NewDialog" Value="CustomizeDlg">1</Publish>
+      <Publish Dialog="VimrcDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="CustomizeDlg" Order="1"><![CDATA[(NOT Installed OR WixUI_InstallMode = "Change") AND &DefaultVimrc <> 3]]></Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="VimrcDlg" Order="1"><![CDATA[(NOT Installed OR WixUI_InstallMode = "Change") AND &DefaultVimrc = 3]]></Publish>
+
+      <Dialog Id="VimrcDlg" Width="370" Height="270" Title="[ProductName] Setup">
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="Vimrc Configuration" />
+  
+        <Control Id="RemapLabel" Type="Text" Width="300" Height="15" X="25" Y="70" Text="Key remapping" NoPrefix="yes" />
+        <Control Id="Remap" Type="RadioButtonGroup" Property="VIMRC_REMAP" Width="300" Height="50" X="37" Y="85">
+          <RadioButtonGroup Property="VIMRC_REMAP">
+            <RadioButton Text="Do not remap keys for Windows behavior (Default)" Height="17" Width="300" X="0" Y="0" Value="no" />
+            <RadioButton Text="Remap a few keys for Windows behavior (&lt;C-V&gt;, &lt;C-C&gt;, &lt;C-A&gt;, etc)" Height="17" Width="300" X="0" Y="20" Value="win" />
+          </RadioButtonGroup>
+        </Control>
+
+        <Control Id="BehaviorLabel" Type="Text" Width="248" Height="17" X="25" Y="140" Text="Mouse behavior" />
+        <Control Id="Behavior" Type="RadioButtonGroup" Property="VIMRC_BEHAVIOR" Width="300" Height="68" X="37" Y="155">
+          <RadioButtonGroup Property="VIMRC_BEHAVIOR">
+            <RadioButton Text="Right button has a popup menu, left button starts visual mode (Default)" Height="17" Width="300" X="0" Y="0" Value="default" />
+            <RadioButton Text="Right button extends selection, left button starts visual mode (Unix)" Height="17" Width="300" X="0" Y="20" Value="unix" />
+            <RadioButton Text="Right button has a popup menu, left button starts select mode (Windows)" Height="17" Width="300" X="0" Y="41" Value="mswin" />
+          </RadioButtonGroup>
+        </Control>
+      </Dialog>
+    </UI>
+  </Fragment>
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
@@ -124,10 +198,7 @@
   <Fragment>
     <DirectoryRef Id="Vim">
       <Component Id="DefaultVimrcComponent" Guid="*">
-          <File Id="vimrc"
-                Source="$(var.ResourceDir)\_vimrc"
-                KeyPath="yes"
-                Checksum="yes" />
+        <File Id="fil30026CAE7DF1D1F6F3496B2C32AF0DED" KeyPath="yes" Source="$(var.SrcDirectory)\_vimrc" />
       </Component>
     </DirectoryRef>
   </Fragment>

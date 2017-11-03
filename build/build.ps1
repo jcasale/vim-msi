@@ -24,7 +24,6 @@ Add-Type -assembly 'System.IO.Compression.FileSystem' -ErrorAction Stop
 
 $url = 'https://github.com/vim/vim-win32-installer/releases/download/v{0}.{1}.{2:D4}/gvim_{0}.{1}.{2:D4}_x64.zip' -f $Major, $Minor, $Patch
 $currentDirectory = (Resolve-Path .).Path
-$resourceDirectory = Join-Path $currentDirectory 'resource'
 $srcDirectory = Join-Path $currentDirectory 'src'
 $tmpDirectory = Join-Path $currentDirectory 'tmp'
 $archiveFile = Join-Path $tmpDirectory (split-path -leaf $url)
@@ -74,7 +73,7 @@ $heatArguments =
   '-var',
   'var.VimSource',
   '-o',
-  (Join-Path $currentDirectory 'src\Fragment.wxs')
+  (Join-Path $tmpDirectory 'Fragment.wxs')
 & heat.exe $heatArguments
 
 if ($LASTEXITCODE -ne 0)
@@ -85,7 +84,7 @@ if ($LASTEXITCODE -ne 0)
 # Compile.
 $candleArguments =
   ('-dVimSource={0}' -f (Join-Path $tmpDirectory '\vim\vim80')),
-  ('-dResourceDir={0}' -f $resourceDirectory),
+  ('-dSrcDirectory={0}' -f $srcDirectory),
   ('-dProductVersion={0}.{1}.{2}.0' -f $Major, $Minor, $Patch), # Don't pad MSI version.
   '-out',
   ($tmpDirectory.TrimEnd('\') + '\'),
@@ -95,7 +94,7 @@ $candleArguments =
   'WixUtilExtension.dll',
   '-ext',
   'WixUIExtension.dll',
-  (Join-Path $srcDirectory 'Fragment.wxs'),
+  (Join-Path $tmpDirectory 'Fragment.wxs'),
   (Join-Path $srcDirectory 'Product.wxs')
 & candle.exe $candleArguments
 
