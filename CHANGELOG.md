@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.0.1451.0 (2018-01-31)
+
+Windows Installer package of [gvim_8.0.1451_x64.zip](https://github.com/vim/vim-win32-installer/releases/download/v8.0.1451/gvim_8.0.1451_x64.zip).
+
 ## 8.0.1257.0 (2017-11-02)
 
 Windows Installer package of [gvim_8.0.1257_x64.zip](https://github.com/vim/vim-win32-installer/releases/download/v8.0.1257/gvim_8.0.1257_x64.zip).
