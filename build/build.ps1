@@ -40,6 +40,7 @@ if ($LASTEXITCODE -ne 0)
 
 try
 {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     (New-Object System.Net.WebClient).DownloadFile($url, $archiveFile)
     [System.IO.Compression.ZipFile]::ExtractToDirectory($archiveFile, $tmpDirectory)
 }
