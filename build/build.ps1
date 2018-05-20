@@ -49,18 +49,18 @@ catch
     throw $_
 }
 
-Remove-Item (Join-Path $tmpDirectory 'vim\vim80\GvimExt32\GvimExt.reg') -Force -ErrorAction Stop
-Remove-Item (Join-Path $tmpDirectory 'vim\vim80\GvimExt32\README.txt') -Force -ErrorAction Stop
-Remove-Item (Join-Path $tmpDirectory 'vim\vim80\GvimExt64\GvimExt.reg') -Force -ErrorAction Stop
-Remove-Item (Join-Path $tmpDirectory 'vim\vim80\GvimExt64\README.txt') -Force -ErrorAction Stop
-Remove-Item (Join-Path $tmpDirectory 'vim\vim80\install.exe') -Force -ErrorAction Stop
-Remove-Item (Join-Path $tmpDirectory 'vim\vim80\uninstal.exe') -Force -ErrorAction Stop
-Remove-Item (Join-Path $tmpDirectory 'vim\vim80\*.desktop') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim81\GvimExt32\GvimExt.reg') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim81\GvimExt32\README.txt') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim81\GvimExt64\GvimExt.reg') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim81\GvimExt64\README.txt') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim81\install.exe') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim81\uninstal.exe') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim81\*.desktop') -Force -ErrorAction Stop
 
 # Harvest.
 $heatArguments =
   'dir',
-  (Join-Path $tmpDirectory '\vim\vim80'),
+  (Join-Path $tmpDirectory '\vim\vim81'),
   '-cg',
   'ProductComponents',
   '-g1',
@@ -84,7 +84,7 @@ if ($LASTEXITCODE -ne 0)
 
 # Compile.
 $candleArguments =
-  ('-dVimSource={0}' -f (Join-Path $tmpDirectory '\vim\vim80')),
+  ('-dVimSource={0}' -f (Join-Path $tmpDirectory '\vim\vim81')),
   ('-dSrcDirectory={0}' -f $srcDirectory),
   ('-dProductVersion={0}.{1}.{2}.0' -f $Major, $Minor, $Patch), # Don't pad MSI version.
   '-out',
