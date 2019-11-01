@@ -54,7 +54,7 @@ Remove-Item (Join-Path $tmpDirectory 'vim\vim81\GvimExt32\README.txt') -Force -E
 Remove-Item (Join-Path $tmpDirectory 'vim\vim81\GvimExt64\GvimExt.reg') -Force -ErrorAction Stop
 Remove-Item (Join-Path $tmpDirectory 'vim\vim81\GvimExt64\README.txt') -Force -ErrorAction Stop
 Remove-Item (Join-Path $tmpDirectory 'vim\vim81\install.exe') -Force -ErrorAction Stop
-Remove-Item (Join-Path $tmpDirectory 'vim\vim81\uninstal.exe') -Force -ErrorAction Stop
+Remove-Item (Join-Path $tmpDirectory 'vim\vim81\uninstall.exe') -Force -ErrorAction Stop
 Remove-Item (Join-Path $tmpDirectory 'vim\vim81\*.desktop') -Force -ErrorAction Stop
 
 # Harvest.
