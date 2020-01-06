@@ -186,11 +186,11 @@
       <Directory Id="DesktopFolder" SourceName="Desktop" />
       <Directory Id="ProgramFiles64Folder">
         <Directory Id="Vim" Name="vim" >
-          <Directory Id="INSTALLDIR" Name="vim81" />
+          <Directory Id="INSTALLDIR" Name="vim82" />
         </Directory>
       </Directory>
       <Directory Id="ProgramMenuFolder">
-        <Directory Id="ProgramMenuFolderApplication" Name="Vim 8.1" />
+        <Directory Id="ProgramMenuFolderApplication" Name="Vim 8.2" />
       </Directory>
     </Directory>
   </Fragment>
@@ -207,18 +207,18 @@
     <DirectoryRef Id="DesktopFolder">
       <Component Id="DesktopShortcutsComponent" Guid="*">
         <Shortcut Id="DesktopShortcutsComponent.gVim"
-                  Name="gVim 8.1"
+                  Name="gVim 8.2"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   WorkingDirectory="HomeDrivePath" />
         <Shortcut Id="DesktopShortcutsComponent.gVim.Easy"
-                  Name="gVim Easy 8.1"
+                  Name="gVim Easy 8.2"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-y"
                   WorkingDirectory="HomeDrivePath" />
         <Shortcut Id="DesktopShortcutsComponent.gVim.ReadOnly"
-                  Name="gVim Read only 8.1"
+                  Name="gVim Read only 8.2"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-R"

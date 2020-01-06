@@ -1,9 +1,12 @@
 # Changelog
 
+## 8.2.0090 (2020-01-05)
+
+Windows Installer package of [gvim_8.2.0090_x64.zip](https://github.com/vim/vim-win32-installer/releases/download/v8.2.0090/gvim_8.2.0090_x64.zip).
+
 ## 8.1.0010 (2018-05-20)
 
 Windows Installer package of [gvim_8.1.0010_x64.zip](https://github.com/vim/vim-win32-installer/releases/download/v8.1.0010/gvim_8.1.0010_x64.zip).
-
 
 ## 8.0.1553.0 (2018-02-28)
 
