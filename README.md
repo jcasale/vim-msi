@@ -6,12 +6,19 @@ A WIX project that packages vim into a Windows MSI
 
 ## Compiling the MSI
 
-Invoke the PowerShell script with the version desired:
+Invoke the PowerShell without any parameters to build the latest version:
+
+```powershell
+.\build.ps1 -ErrorAction Stop
+```
+
+or explicitly define the version:
+
 ```powershell
 .\build.ps1 `
-  -Uri https://github.com/vim/vim-win32-installer/releases/download/v8.2.2451/gvim_8.2.2451_x64.zip `
-  -Version 8.2.2451 `
-  -ErrorAction Stop
+    -Uri https://github.com/vim/vim-win32-installer/releases/download/v8.2.2451/gvim_8.2.2451_x64.zip `
+    -Version 8.2.2451 `
+    -ErrorAction Stop
 ```
 
 ## ADDLOCAL Properties

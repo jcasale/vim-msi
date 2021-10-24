@@ -1,10 +1,10 @@
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName='default')]
 param
 (
-    [Parameter(Mandatory=$true,Position=0)]
+    [Parameter(Mandatory=$true,Position=0,ParameterSetName='Explicit')]
     [uri]
     $Uri,
-    [Parameter(Mandatory=$true,Position=1)]
+    [Parameter(Mandatory=$true,Position=1,ParameterSetName='Explicit')]
     [version]
     $Version
 )
@@ -21,6 +21,28 @@ Add-Type -Assembly 'System.IO.Compression.FileSystem' -ErrorAction Stop
 [void](Get-Command 'candle.exe' -ErrorAction Stop)
 [void](Get-Command 'light.exe' -ErrorAction Stop)
 
+# Determine release URI and version.
+if ($PsCmdlet.ParameterSetName -eq 'Explicit')
+{
+    $releaseUri = $Uri
+    $releaseVersion = $Version
+}
+else
+{
+    $apiUri = 'https://api.github.com/repos/vim/vim-win32-installer/releases/latest'
+    $response = Invoke-RestMethod -Uri $apiUri -ErrorAction Stop
+    $assetVersion = $response.tag_name.TrimStart('v')
+    [regex]$regex = 'gvim_{0}_x64.zip' -f $assetVersion
+    $asset = $response.assets.Where({ $_.name -match $regex }, 'First')
+    if ($null -eq $asset)
+    {
+        throw 'Failed to query the latest release.'
+    }
+
+    $releaseUri = [uri]$asset.browser_download_url
+    $releaseVersion = [version]$assetVersion
+}
+
 # Clean build environment.
 & git.exe 'clean' '-xfd' '--exclude=.vscode/'
 
@@ -32,7 +54,7 @@ if ($LASTEXITCODE -ne 0)
 # Prepare build environment.
 $tmp = New-Item -Path tmp -ItemType Directory -ErrorAction Stop
 
-$fileNameArchive = split-path -leaf $Uri.AbsolutePath
+$fileNameArchive = split-path -leaf $releaseUri.AbsolutePath
 $pathArchive = Join-Path $tmp $fileNameArchive
 $pathProductSource = Join-Path $tmp '\vim\vim82'
 $pathSrc = Join-Path $PSScriptRoot 'src'
@@ -46,7 +68,7 @@ $pathMsi = Join-Path $tmp 'vim.msi'
 $webClient = [Net.WebClient]::new()
 try
 {
-    $webClient.DownloadFile($Uri, $pathArchive)
+    $webClient.DownloadFile($releaseUri, $pathArchive)
 }
 catch
 {
@@ -116,7 +138,7 @@ if ($LASTEXITCODE -ne 0)
 $candleArguments =
   ('-dVimSource={0}' -f $pathProductSource),
   ('-dSrcDirectory={0}' -f $pathSrc),
-  ('-dProductVersion={0}' -f $Version),
+  ('-dProductVersion={0}' -f $releaseVersion),
   '-out',
   ($tmp.FullName.TrimEnd('\') + '\'),
   '-arch',
