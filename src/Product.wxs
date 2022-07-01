@@ -160,7 +160,7 @@
         <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
         <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="Vimrc Configuration" />
-  
+
         <Control Id="RemapLabel" Type="Text" Width="300" Height="15" X="25" Y="70" Text="Key remapping" NoPrefix="yes" />
         <Control Id="Remap" Type="RadioButtonGroup" Property="VIMRC_REMAP" Width="300" Height="50" X="37" Y="85">
           <RadioButtonGroup Property="VIMRC_REMAP">
@@ -186,11 +186,11 @@
       <Directory Id="DesktopFolder" SourceName="Desktop" />
       <Directory Id="ProgramFiles64Folder">
         <Directory Id="Vim" Name="vim" >
-          <Directory Id="INSTALLDIR" Name="vim82" />
+          <Directory Id="INSTALLDIR" Name="vim$(var.ProductVersionMajor)$(var.ProductVersionMinor)" />
         </Directory>
       </Directory>
       <Directory Id="ProgramMenuFolder">
-        <Directory Id="ProgramMenuFolderApplication" Name="Vim 8.2" />
+        <Directory Id="ProgramMenuFolderApplication" Name="Vim $(var.ProductVersionMajor).$(var.ProductVersionMinor)" />
       </Directory>
     </Directory>
   </Fragment>
@@ -207,18 +207,18 @@
     <DirectoryRef Id="DesktopFolder">
       <Component Id="DesktopShortcutsComponent" Guid="*">
         <Shortcut Id="DesktopShortcutsComponent.gVim"
-                  Name="gVim 8.2"
+                  Name="gVim $(var.ProductVersionMajor).$(var.ProductVersionMinor)"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   WorkingDirectory="HomeDrivePath" />
         <Shortcut Id="DesktopShortcutsComponent.gVim.Easy"
-                  Name="gVim Easy 8.2"
+                  Name="gVim Easy $(var.ProductVersionMajor).$(var.ProductVersionMinor)"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-y"
                   WorkingDirectory="HomeDrivePath" />
         <Shortcut Id="DesktopShortcutsComponent.gVim.ReadOnly"
-                  Name="gVim Read only 8.2"
+                  Name="gVim Read only $(var.ProductVersionMajor).$(var.ProductVersionMinor)"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-R"

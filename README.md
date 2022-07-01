@@ -16,8 +16,8 @@ or explicitly define the version:
 
 ```powershell
 .\build.ps1 `
-    -Uri https://github.com/vim/vim-win32-installer/releases/download/v8.2.2451/gvim_8.2.2451_x64.zip `
-    -Version 8.2.2451 `
+    -Uri https://github.com/vim/vim-win32-installer/releases/download/v9.0.0014/gvim_9.0.0014_x64.zip `
+    -Version 9.0.0014 `
     -ErrorAction Stop
 ```
 

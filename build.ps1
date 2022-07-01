@@ -58,7 +58,7 @@ $pathTemp = New-Item -Path tmp -ItemType Directory -ErrorAction Stop
 
 $fileNameArchive = split-path -leaf $releaseUri.AbsolutePath
 $pathArchive = Join-Path $pathTemp $fileNameArchive
-$pathProductSource = Join-Path $pathTemp '\vim\vim82'
+$pathProductSource = Join-Path $pathTemp ('\vim\vim{0}{1}' -f $releaseVersion.Major, $releaseVersion.Minor)
 $pathSrc = Join-Path $PSScriptRoot 'src'
 $pathWixProductSource = Join-Path $pathSrc 'Product.wxs'
 $pathWixProductObj = Join-Path $pathTemp 'Product.wixobj'
@@ -147,6 +147,8 @@ $candleArguments =
   ('-dVimSource={0}' -f $pathProductSource),
   ('-dSrcDirectory={0}' -f $pathSrc),
   ('-dProductVersion={0}' -f $releaseVersion),
+  ('-dProductVersionMajor={0}' -f $releaseVersion.Major),
+  ('-dProductVersionMinor={0}' -f $releaseVersion.Minor),
   '-out',
   ($pathTemp.FullName.TrimEnd('\') + '\'),
   '-arch',
