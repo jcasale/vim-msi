@@ -1,4 +1,4 @@
-source $VIMRUNTIME/vimrc_example.vim
+source $VIMRUNTIME/gvimrc_example.vim
 
 set diffexpr=MyDiff()
 function MyDiff()
