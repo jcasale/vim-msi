@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.0.0014 (2022-06-30)
+
+Windows Installer package of [gvim_9.0.0014_x64.zip](https://github.com/vim/vim-win32-installer/releases/download/v9.0.0014/gvim_9.0.0014_x64.zip).
+
 ## 8.2.4897 (2022-05-07)
 
 Windows Installer package of [gvim_8.2.4897_x64.zip](https://github.com/vim/vim-win32-installer/releases/download/v8.2.4897/gvim_8.2.4897_x64.zip).
