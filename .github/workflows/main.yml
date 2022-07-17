@@ -1,0 +1,89 @@
+name: CI
+on:
+  schedule:
+    - cron:  '42 6 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get vim/vim-win32-installer tag
+        uses: oprypin/find-latest-tag@v1.1.0
+        id: vimtag
+        with:
+          repository: vim/vim-win32-installer
+          releases-only: true
+
+      - run: echo "vim/vim-win32-installer is at ${{ steps.vimtag.outputs.tag }}"
+
+      - name: Get ${{ github.repository }} tag
+        uses: oprypin/find-latest-tag@v1.1.0
+        id: ourtag
+        with:
+          repository: ${{ github.repository }}
+
+      - run: echo "${{ github.repository }} is at ${{ steps.ourtag.outputs.tag }}"
+
+      - name: Set version
+        id: version
+        if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
+        run: |
+          $tag = "${{ steps.vimtag.outputs.tag }}".TrimStart("v")
+          $version = [version]::new($tag)
+          echo "::set-output name=versionSemantic::$($version.ToString())"
+          echo "::set-output name=versionMajor::$($version.Major)"
+          echo "::set-output name=versionMinor::$($version.Minor)"
+
+      - name: Setup wix
+        if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
+        run: echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" |Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Download vim
+        if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
+        run: |
+          gh.exe release download ${{ steps.vimtag.outputs.tag }} --pattern '*_x64.zip' --repo vim/vim-win32-installer
+          Get-ChildItem
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract vim
+        if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
+        run: |
+          New-Item -Name build -ItemType Directory -ErrorAction Stop
+          Expand-Archive -Path '*_x64.zip' -DestinationPath build -ErrorAction Stop
+
+      - name: Prepare vim
+        if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
+        run: |
+          Remove-Item ./build/vim/vim*/GvimExt32/GvimExt.reg -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim*/GvimExt32/README.txt -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim*/GvimExt64/GvimExt.reg -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim*/GvimExt64/README.txt -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim*/install.exe -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim*/uninstall.exe -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim*/*.desktop -Force -ErrorAction Stop
+
+      - name: Harvest vim
+        if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
+        run: heat.exe dir build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }} -nologo -cg ProductComponents -g1 -ag -ke -srd -dr INSTALLDIR -sfrag -sreg -var var.VimSource -o build\Fragment.wxs
+
+      - name: Compile vim
+        if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
+        run: candle.exe -nologo -dVimSource=build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }} -dSrcDirectory=src -dProductVersion="${{ steps.version.outputs.versionSemantic }}" -dProductVersionMajor="${{ steps.version.outputs.versionMajor }}" -dProductVersionMinor="${{ steps.version.outputs.versionMinor }}" -out build\ -arch x64 -ext WixUtilExtension.dll -ext WixUIExtension.dll build\Fragment.wxs src\Product.wxs
+
+      - name: Link vim
+        if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
+        run: light.exe -nologo -out vim.msi -ext WixUtilExtension.dll -ext WixUIExtension.dll -spdb build\Fragment.wixobj build\Product.wixobj
+
+      - name: Publish release
+        if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
+        uses: ncipollo/release-action@v1.10.0
+        with:
+          artifacts: vim.msi
+          tag: ${{ steps.vimtag.outputs.tag }}
+          body: Vim Windows build packaged as an msi.
