@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Get vim/vim-win32-installer tag
-        uses: oprypin/find-latest-tag@v1.1.0
+        uses: oprypin/find-latest-tag@v1
         id: vimtag
         with:
           repository: vim/vim-win32-installer
@@ -22,7 +22,7 @@ jobs:
       - run: echo "vim/vim-win32-installer is at ${{ steps.vimtag.outputs.tag }}"
 
       - name: Get ${{ github.repository }} tag
-        uses: oprypin/find-latest-tag@v1.1.0
+        uses: oprypin/find-latest-tag@v1
         id: ourtag
         with:
           repository: ${{ github.repository }}
@@ -82,7 +82,7 @@ jobs:
 
       - name: Publish release
         if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
-        uses: ncipollo/release-action@v1.10.0
+        uses: ncipollo/release-action@v1
         with:
           artifacts: vim.msi
           tag: ${{ steps.vimtag.outputs.tag }}
