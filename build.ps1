@@ -13,13 +13,7 @@ param
 
 Set-StrictMode -Version Latest
 
-Add-Type -Assembly 'System.IO.Compression.FileSystem' -ErrorAction Stop
-
-# Check requirements.
-[void](Get-Command 'git.exe' -ErrorAction Stop)
-[void](Get-Command 'heat.exe' -ErrorAction Stop)
-[void](Get-Command 'candle.exe' -ErrorAction Stop)
-[void](Get-Command 'light.exe' -ErrorAction Stop)
+$ProgressPreference = 'SilentlyContinue'
 
 # Determine release URI and version.
 if ($PsCmdlet.ParameterSetName -eq 'Explicit')
@@ -30,10 +24,10 @@ if ($PsCmdlet.ParameterSetName -eq 'Explicit')
 else
 {
     $apiUri = 'https://api.github.com/repos/vim/vim-win32-installer/releases/latest'
-    $response = Invoke-RestMethod -Uri $apiUri -Verbose:$false -ErrorAction Stop
+    $response = Invoke-RestMethod -Uri $apiUri -ErrorAction Stop
     $assetVersion = $response.tag_name.TrimStart('v')
-    [regex]$regex = 'gvim_{0}_x64.zip' -f $assetVersion
-    $asset = $response.assets.Where({ $_.name -match $regex }, 'First')
+    $name = 'gvim_{0}_x64.zip' -f $assetVersion
+    $asset = $response.assets.Where({ $_.name -eq $name }, 'First')
     if ($null -eq $asset)
     {
         throw 'Failed to query the latest release.'
@@ -67,29 +61,10 @@ $pathWixFragmentObj = Join-Path $pathTemp 'Fragment.wixobj'
 $pathMsi = Join-Path $pathTemp 'vim.msi'
 
 # Download release archive.
-$webClient = [Net.WebClient]::new()
-try
-{
-    $webClient.DownloadFile($releaseUri, $pathArchive)
-}
-catch
-{
-    throw
-}
-finally
-{
-    $webClient.Dispose()
-}
+Invoke-WebRequest -Uri $releaseUri -ContentType 'application/octet-stream' -OutFile $pathArchive -ErrorAction Stop
 
 # Unpack archive.
-try
-{
-    [System.IO.Compression.ZipFile]::ExtractToDirectory($pathArchive, $pathTemp.FullName)
-}
-catch
-{
-    throw
-}
+Expand-Archive $pathArchive $pathTemp.FullName -ErrorAction Stop
 
 # Remove archive.
 Remove-Item -Path $pathArchive -ErrorAction Stop
