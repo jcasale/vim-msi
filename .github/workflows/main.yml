@@ -35,9 +35,9 @@ jobs:
         run: |
           $tag = "${{ steps.vimtag.outputs.tag }}".TrimStart("v")
           $version = [version]::new($tag)
-          echo "::set-output name=versionSemantic::$($version.ToString())"
-          echo "::set-output name=versionMajor::$($version.Major)"
-          echo "::set-output name=versionMinor::$($version.Minor)"
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "versionMajor=$($version.Major)" >> $env:GITHUB_OUTPUT
+          echo "versionMinor=$($version.Minor)" >> $env:GITHUB_OUTPUT
 
       - name: Setup wix
         if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
@@ -74,7 +74,7 @@ jobs:
 
       - name: Compile vim
         if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
-        run: candle.exe -nologo -dVimSource=build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }} -dSrcDirectory=src -dProductVersion="${{ steps.version.outputs.versionSemantic }}" -dProductVersionMajor="${{ steps.version.outputs.versionMajor }}" -dProductVersionMinor="${{ steps.version.outputs.versionMinor }}" -out build\ -arch x64 -ext WixUtilExtension.dll -ext WixUIExtension.dll build\Fragment.wxs src\Product.wxs
+        run: candle.exe -nologo -dVimSource=build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }} -dSrcDirectory=src -dProductVersion="${{ steps.version.outputs.version }}" -dProductVersionMajor="${{ steps.version.outputs.versionMajor }}" -dProductVersionMinor="${{ steps.version.outputs.versionMinor }}" -out build\ -arch x64 -ext WixUtilExtension.dll -ext WixUIExtension.dll build\Fragment.wxs src\Product.wxs
 
       - name: Link vim
         if: steps.vimtag.outputs.tag != steps.ourtag.outputs.tag
