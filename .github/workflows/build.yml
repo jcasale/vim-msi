@@ -1,4 +1,5 @@
-name: CI
+name: build
+
 on:
   schedule:
     - cron:  '42 6 * * *'
