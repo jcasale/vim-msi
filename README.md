@@ -22,10 +22,11 @@ new release and builds an MSI if required. Only the 10 most recent releases are 
 When installing the **DefaultVimrc** feature, you can optionally set the following
 public properties when not using the UI to adjust the feature:
 
-| MSI Property    | Range                       | Default | Description                               |
-|-----------------|-----------------------------|---------|-------------------------------------------|
-| VIMRC\_REMAP    | "no", "win"                 | "win"   | Remap some ctrl keys for Windows behavior |
-| VIMRC\_BEHAVIOR | "default", "xterm", "mswin" | "mswin" | Right and left mouse button behavior      |
+| MSI Property     | Range                                           | Default    | Description                               |
+|------------------|-------------------------------------------------|------------|-------------------------------------------|
+| `VIMRC_BEHAVIOR` | `compatible`, `original`, `default`, `enhanced` | `enhanced` | Compatibility and enhancements            |
+| `VIMRC_MAPPINGS` | `default`, `windows`                            | `windows`  | Remap some ctrl keys for Windows behavior |
+| `VIMRC_MOUSE`    | `default`, `xterm`, `windows`                   | `windows`  | Right and left mouse button behavior      |
 
 ## Notes
 

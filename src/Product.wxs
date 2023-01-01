@@ -4,7 +4,7 @@
          Name="Vim"
          Language="1033"
          Version="$(var.ProductVersion)"
-         Manufacturer="http://www.vim.org/"
+         Manufacturer="Bram Moolenaar et al."
          UpgradeCode="12b27f7b-6f45-4b2c-87ed-61c5008d643b">
     <Package InstallerVersion="200"
              Compressed="yes"
@@ -50,38 +50,107 @@
     </Feature>
 
     <Property Id="HomeDrivePath" Value="%HOMEDRIVE%%HOMEPATH%" />
-    <Property Id="Url" Value="http://vim.sf.net" />
+    <Property Id="Url" Value="https://www.vim.org" />
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
-    <Property Id="VIMRC_REMAP" Value="win" />
-    <Property Id="VIMRC_BEHAVIOR" Value="mswin" />
+    <Property Id="VIMRC_BEHAVIOR" Value="enhanced" />
+    <Property Id="VIMRC_MAPPINGS" Value="windows" />
+    <Property Id="VIMRC_MOUSE" Value="windows" />
 
-    <Condition Message="The VIMRC_REMAP property must be one of &quot;no&quot; or &quot;win&quot;.">
-      <![CDATA[Installed OR VIMRC_REMAP = "no" OR VIMRC_REMAP = "win"]]>
+    <Condition Message="The VIMRC_BEHAVIOR property must be one of &quot;compatible&quot;, &quot;original&quot;, &quot;default&quot; or &quot;enhanced&quot;.">
+      <![CDATA[Installed OR VIMRC_BEHAVIOR = "compatible" OR VIMRC_BEHAVIOR = "original" OR VIMRC_BEHAVIOR = "default" OR VIMRC_BEHAVIOR = "enhanced"]]>
     </Condition>
-    <Condition Message="The VIMRC_BEHAVIOR property must be one of &quot;default&quot;, &quot;xterm&quot; or &quot;mswin&quot;.">
-      <![CDATA[Installed OR VIMRC_BEHAVIOR = "default" OR VIMRC_BEHAVIOR = "xterm" OR VIMRC_BEHAVIOR = "mswin"]]>
+    <Condition Message="The VIMRC_MAPPINGS property must be one of &quot;default&quot; or &quot;windows&quot;.">
+      <![CDATA[Installed OR VIMRC_MAPPINGS = "default" OR VIMRC_MAPPINGS = "windows"]]>
+    </Condition>
+    <Condition Message="The VIMRC_MOUSE property must be one of &quot;default&quot;, &quot;xterm&quot; or &quot;windows&quot;.">
+      <![CDATA[Installed OR VIMRC_MOUSE = "default" OR VIMRC_MOUSE = "xterm" OR VIMRC_MOUSE = "windows"]]>
     </Condition>
 
-    <SetProperty Id="VimrcBehavior"
-                 Before="VimrcBehavior"
+    <SetProperty Id="VimrcBehaviorCompatible"
+                 Before="VimrcBehaviorCompatible"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&amp;\rbehave [VIMRC_BEHAVIOR]/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
-      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND (VIMRC_BEHAVIOR = "xterm" OR VIMRC_BEHAVIOR = "mswin")]]>
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vi compatible.\rset compatible\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
+      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "compatible"]]>
     </SetProperty>
-    <CustomAction Id="VimrcBehavior"
+    <CustomAction Id="VimrcBehaviorCompatible"
                   BinaryKey="WixCA"
                   DllEntry="WixQuietExec64"
                   Execute="deferred"
                   Return="check"
                   Impersonate="no" />
 
-    <SetProperty Id="VimrcRemap"
-                 Before="VimrcRemap"
+    <SetProperty Id="VimrcBehaviorOriginal"
+                 Before="VimrcBehaviorOriginal"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&amp;\rsource $VIMRUNTIME\/mswin.vim/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
-      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_REMAP = "win"]]>
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vim's default behavior.\rif \&amp;compatible\r  set nocompatible\rendif\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
+      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "original"]]>
     </SetProperty>
-    <CustomAction Id="VimrcRemap"
+    <CustomAction Id="VimrcBehaviorOriginal"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
+    <SetProperty Id="VimrcBehaviorDefault"
+                 Before="VimrcBehaviorDefault"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vim with some enhancements.\rsource $VIMRUNTIME\/defaults.vim\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
+      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "default"]]>
+    </SetProperty>
+    <CustomAction Id="VimrcBehaviorDefault"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
+    <SetProperty Id="VimrcBehaviorEnhanced"
+                 Before="VimrcBehaviorEnhanced"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vim with all enhancements.\rsource $VIMRUNTIME\/vimrc_example.vim\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
+      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "enhanced"]]>
+    </SetProperty>
+    <CustomAction Id="VimrcBehaviorEnhanced"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
+    <SetProperty Id="VimrcMappings"
+                 Before="VimrcMappings"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Remap a few keys for Windows behavior.\rsource $VIMRUNTIME\/mswin.vim\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
+      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MAPPINGS = "windows"]]>
+    </SetProperty>
+    <CustomAction Id="VimrcMappings"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
+    <SetProperty Id="VimrcMouseXterm"
+                 Before="VimrcMouseXterm"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Mouse behavior (the Unix way).\rbehave xterm\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
+      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = "xterm"]]>
+    </SetProperty>
+    <CustomAction Id="VimrcMouseXterm"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="check"
+                  Impersonate="no" />
+
+    <SetProperty Id="VimrcMouseWindows"
+                 Before="VimrcMouseWindows"
+                 Sequence="execute"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Mouse behavior (the Windows way).\rbehave mswin\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
+      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = "windows"]]>
+    </SetProperty>
+    <CustomAction Id="VimrcMouseWindows"
                   BinaryKey="WixCA"
                   DllEntry="WixQuietExec64"
                   Execute="deferred"
@@ -122,8 +191,13 @@
                   Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="VimrcBehavior" After="InstallFiles"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND (VIMRC_BEHAVIOR = "xterm" OR VIMRC_BEHAVIOR = "mswin")]]></Custom>
-      <Custom Action="VimrcRemap" After="InstallFiles"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_REMAP = "win"]]></Custom>
+      <Custom Action="VimrcBehaviorCompatible" After="VimrcMappings"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "compatible"]]></Custom>
+      <Custom Action="VimrcBehaviorOriginal" After="VimrcBehaviorCompatible"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "original"]]></Custom>
+      <Custom Action="VimrcBehaviorDefault" After="VimrcBehaviorOriginal"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "default"]]></Custom>
+      <Custom Action="VimrcBehaviorEnhanced" After="VimrcBehaviorDefault"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "enhanced"]]></Custom>
+      <Custom Action="VimrcMappings" After="VimrcMouseWindows"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MAPPINGS = "windows"]]></Custom>
+      <Custom Action="VimrcMouseXterm" After="InstallFiles"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = "xterm"]]></Custom>
+      <Custom Action="VimrcMouseWindows" After="VimrcMouseXterm"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = "windows"]]></Custom>
       <Custom Action="OleRegister" After="InstallFiles"><![CDATA[NOT Installed]]></Custom>
       <Custom Action="OleRegisterRollback" After="InstallFiles"><![CDATA[NOT Installed]]></Custom>
       <Custom Action="OleUnRegister" Before="RemoveFiles"><![CDATA[Installed]]></Custom>
@@ -161,21 +235,34 @@
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
         <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="Vimrc Configuration" />
 
-        <Control Id="RemapLabel" Type="Text" Width="300" Height="15" X="25" Y="70" Text="Key remapping" NoPrefix="yes" />
-        <Control Id="Remap" Type="RadioButtonGroup" Property="VIMRC_REMAP" Width="300" Height="50" X="37" Y="85">
-          <RadioButtonGroup Property="VIMRC_REMAP">
-            <RadioButton Text="Do not remap keys for Windows behavior (Default)" Height="17" Width="300" X="0" Y="0" Value="no" />
-            <RadioButton Text="Remap a few keys for Windows behavior (&lt;C-V&gt;, &lt;C-C&gt;, &lt;C-A&gt;, etc)" Height="17" Width="300" X="0" Y="20" Value="win" />
-          </RadioButtonGroup>
+        <Control Id="BehaviorGroupBox" Type="GroupBox" X="10" Y="50"  Width="350" Height="55" Text="Vi / Vim behavior" />
+        <Control Id="BehaviorText" Type="Text" X="20" Y="63" Width="300" Height="10" Text="Compatibility and enhancements" />
+        <Control Id="BehaviorComboBox" Type="ComboBox" X="40" Y="80" Width="290" Height="50" ComboList="yes" Sorted="yes" Property="VIMRC_BEHAVIOR">
+          <ComboBox Property="VIMRC_BEHAVIOR">
+            <ListItem Text="Vi compatible" Value="compatible" />
+            <ListItem Text="Vim original" Value="original" />
+            <ListItem Text="Vim with some enhancements (load defaults.vim)" Value="default" />
+            <ListItem Text="Vim with all enhancements (load vimrc_example.vim)" Value="enhanced" />
+          </ComboBox>
         </Control>
 
-        <Control Id="BehaviorLabel" Type="Text" Width="248" Height="17" X="25" Y="140" Text="Mouse behavior" />
-        <Control Id="Behavior" Type="RadioButtonGroup" Property="VIMRC_BEHAVIOR" Width="300" Height="68" X="37" Y="155">
-          <RadioButtonGroup Property="VIMRC_BEHAVIOR">
-            <RadioButton Text="Right button has a popup menu, left button starts visual mode (Default)" Height="17" Width="300" X="0" Y="0" Value="default" />
-            <RadioButton Text="Right button extends selection, left button starts visual mode (Unix)" Height="17" Width="300" X="0" Y="20" Value="unix" />
-            <RadioButton Text="Right button has a popup menu, left button starts select mode (Windows)" Height="17" Width="300" X="0" Y="41" Value="mswin" />
-          </RadioButtonGroup>
+        <Control Id="MappingsGroupBox" Type="GroupBox" X="10" Y="110" Width="350" Height="55" Text="Mappings" />
+        <Control Id="MappingsText" Type="Text" X="20" Y="123" Width="300" Height="10" Text="Remap a few keys for Windows (Ctrl-V, Ctrl-C, Ctrl-A, Ctrl-S, Ctrl-F, etc)" />
+        <Control Id="MappingsComboBox" Type="ComboBox" X="40" Y="140" Width="290" Height="50" ComboList="yes" Sorted="yes" Property="VIMRC_MAPPINGS">
+          <ComboBox Property="VIMRC_MAPPINGS">
+            <ListItem Text="Do not remap keys" Value="default" />
+            <ListItem Text="Remap a few keys" Value="windows" />
+          </ComboBox>
+        </Control>
+
+        <Control Id="MouseGroupBox" Type="GroupBox" X="10" Y="170" Width="350" Height="55" Text="Mouse" />
+        <Control Id="MouseText" Type="Text" X="20" Y="183" Width="300" Height="10" Text="Behavior of right and left buttons" />
+        <Control Id="MouseComboBox" Type="ComboBox" X="40" Y="200" Width="290" Height="50" ComboList="yes" Sorted="yes" Property="VIMRC_MOUSE">
+          <ComboBox Property="VIMRC_MOUSE">
+            <ListItem Text="Right: popup menu, Left: visual mode (default)" Value="default" />
+            <ListItem Text="Right: popup menu, Left: select mode (Windows)" Value="windows" />
+            <ListItem Text="Right: extends selection, Left: visual mode (Unix)" Value="xterm" />
+          </ComboBox>
         </Control>
       </Dialog>
     </UI>
@@ -287,9 +374,9 @@
                   Target="[INSTALLDIR]vim.exe"
                   Arguments="-R"
                   WorkingDirectory="HomeDrivePath" />
-        <Shortcut Id="StartMenuShortcutsComponent.OnlineDocumentation"
+        <Shortcut Id="StartMenuShortcutsComponent.VimOnline"
                   Name="Vim Online"
-                  Description="Vim Online Documentation"
+                  Description="Vim Online"
                   Icon="gvim"
                   Target="[Url]" />
         <RemoveFolder Id="ProgramMenuFolderApplication" On="uninstall" />
