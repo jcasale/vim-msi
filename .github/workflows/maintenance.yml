@@ -2,7 +2,7 @@ name: maintenance
 
 on:
   schedule:
-    - cron:  '42 7 * * *'
+    - cron: "42 7 * * *"
 
   workflow_dispatch:
 

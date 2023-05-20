@@ -1,30 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
-<Product Id="*"
-         Name="Vim"
-         Language="1033"
-         Version="$(var.ProductVersion)"
-         Manufacturer="Bram Moolenaar et al."
-         UpgradeCode="12b27f7b-6f45-4b2c-87ed-61c5008d643b">
-    <Package InstallerVersion="200"
-             Compressed="yes"
-             InstallScope="perMachine"
-             Platform="x64"
-             InstallPrivileges="elevated"
-             Description="Vim is an advanced text editor that seeks to provide the power of the de-facto Unix editor 'Vi', with a more complete feature set."
-             Comments="Vim v$(var.ProductVersion)" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <Package Name="Vim"
+           Language="1033"
+           Version="$(var.ProductVersion)"
+           Manufacturer="Bram Moolenaar et al."
+           UpgradeCode="12b27f7b-6f45-4b2c-87ed-61c5008d643b">
+    <SummaryInformation Description="Vim is an advanced text editor that seeks to provide the power of the de-facto Unix editor 'Vi', with a more complete feature set." />
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <Media Id="1" Cabinet="Data.cab" EmbedCab="yes" CompressionLevel="high" />
-
     <Icon Id="gvim" SourceFile="$(var.VimSource)\gvim.exe" />
 
     <Feature Id="Product"
-             Absent="disallow"
              ConfigurableDirectory="INSTALLDIR"
              Description="Vim/Gvim binaries."
              Display="expand"
-             Title="Vim for Windows">
+             Title="Vim for Windows"
+             AllowAbsent="no">
       <ComponentGroupRef Id="ProductComponents" />
       <Feature Id="ShellIntegration"
                Description="Adds Vim to the &quot;Open With...&quot; list and installs an entry in the popup menu for the right mouse button so that you can edit any file with Vim."
@@ -49,219 +42,365 @@
       </Feature>
     </Feature>
 
-    <Property Id="HomeDrivePath" Value="%HOMEDRIVE%%HOMEPATH%" />
     <Property Id="Url" Value="https://www.vim.org" />
-    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+    <Property Id="ARPPRODUCTICON" Value="gvim" />
     <Property Id="VIMRC_BEHAVIOR" Value="enhanced" />
     <Property Id="VIMRC_MAPPINGS" Value="windows" />
     <Property Id="VIMRC_MOUSE" Value="windows" />
 
-    <Condition Message="The VIMRC_BEHAVIOR property must be one of &quot;compatible&quot;, &quot;original&quot;, &quot;default&quot; or &quot;enhanced&quot;.">
-      <![CDATA[Installed OR VIMRC_BEHAVIOR = "compatible" OR VIMRC_BEHAVIOR = "original" OR VIMRC_BEHAVIOR = "default" OR VIMRC_BEHAVIOR = "enhanced"]]>
-    </Condition>
-    <Condition Message="The VIMRC_MAPPINGS property must be one of &quot;default&quot; or &quot;windows&quot;.">
-      <![CDATA[Installed OR VIMRC_MAPPINGS = "default" OR VIMRC_MAPPINGS = "windows"]]>
-    </Condition>
-    <Condition Message="The VIMRC_MOUSE property must be one of &quot;default&quot;, &quot;xterm&quot; or &quot;windows&quot;.">
-      <![CDATA[Installed OR VIMRC_MOUSE = "default" OR VIMRC_MOUSE = "xterm" OR VIMRC_MOUSE = "windows"]]>
-    </Condition>
+    <Launch Condition="Installed OR VIMRC_BEHAVIOR = &quot;compatible&quot; OR VIMRC_BEHAVIOR = &quot;original&quot; OR VIMRC_BEHAVIOR = &quot;default&quot; OR VIMRC_BEHAVIOR = &quot;enhanced&quot;"
+            Message="The VIMRC_BEHAVIOR property must be one of &quot;compatible&quot;, &quot;original&quot;, &quot;default&quot; or &quot;enhanced&quot;." />
+    <Launch Condition="Installed OR VIMRC_MAPPINGS = &quot;default&quot; OR VIMRC_MAPPINGS = &quot;windows&quot;"
+            Message="The VIMRC_MAPPINGS property must be one of &quot;default&quot; or &quot;windows&quot;." />
+    <Launch Condition="Installed OR VIMRC_MOUSE = &quot;default&quot; OR VIMRC_MOUSE = &quot;xterm&quot; OR VIMRC_MOUSE = &quot;windows&quot;"
+            Message="The VIMRC_MOUSE property must be one of &quot;default&quot;, &quot;xterm&quot; or &quot;windows&quot;." />
 
     <SetProperty Id="VimrcBehaviorCompatible"
                  Before="VimrcBehaviorCompatible"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vi compatible.\rset compatible\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
-      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "compatible"]]>
-    </SetProperty>
+                 Value="&quot;[INSTALLDIR]vim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vi compatible.\rset compatible\r\r&amp;/g&quot; -c wq &quot;[VimFolder]_vimrc&quot;" />
     <CustomAction Id="VimrcBehaviorCompatible"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                  DllEntry="WixQuietExec"
                   Execute="deferred"
                   Return="check"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
     <SetProperty Id="VimrcBehaviorOriginal"
                  Before="VimrcBehaviorOriginal"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vim's default behavior.\rif \&amp;compatible\r  set nocompatible\rendif\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
-      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "original"]]>
-    </SetProperty>
+                 Value="&quot;[INSTALLDIR]vim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vim's default behavior.\rif \&amp;compatible\r  set nocompatible\rendif\r\r&amp;/g&quot; -c wq &quot;[VimFolder]_vimrc&quot;" />
     <CustomAction Id="VimrcBehaviorOriginal"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                  DllEntry="WixQuietExec"
                   Execute="deferred"
                   Return="check"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
     <SetProperty Id="VimrcBehaviorDefault"
                  Before="VimrcBehaviorDefault"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vim with some enhancements.\rsource $VIMRUNTIME\/defaults.vim\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
-      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "default"]]>
-    </SetProperty>
+                 Value="&quot;[INSTALLDIR]vim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vim with some enhancements.\rsource $VIMRUNTIME\/defaults.vim\r\r&amp;/g&quot; -c wq &quot;[VimFolder]_vimrc&quot;" />
     <CustomAction Id="VimrcBehaviorDefault"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                  DllEntry="WixQuietExec"
                   Execute="deferred"
                   Return="check"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
     <SetProperty Id="VimrcBehaviorEnhanced"
                  Before="VimrcBehaviorEnhanced"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vim with all enhancements.\rsource $VIMRUNTIME\/vimrc_example.vim\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
-      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "enhanced"]]>
-    </SetProperty>
+                 Value="&quot;[INSTALLDIR]vim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Vim with all enhancements.\rsource $VIMRUNTIME\/vimrc_example.vim\r\r&amp;/g&quot; -c wq &quot;[VimFolder]_vimrc&quot;" />
     <CustomAction Id="VimrcBehaviorEnhanced"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                  DllEntry="WixQuietExec"
                   Execute="deferred"
                   Return="check"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
     <SetProperty Id="VimrcMappings"
                  Before="VimrcMappings"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Remap a few keys for Windows behavior.\rsource $VIMRUNTIME\/mswin.vim\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
-      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MAPPINGS = "windows"]]>
-    </SetProperty>
+                 Value="&quot;[INSTALLDIR]vim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Remap a few keys for Windows behavior.\rsource $VIMRUNTIME\/mswin.vim\r\r&amp;/g&quot; -c wq &quot;[VimFolder]_vimrc&quot;" />
     <CustomAction Id="VimrcMappings"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                  DllEntry="WixQuietExec"
                   Execute="deferred"
                   Return="check"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
     <SetProperty Id="VimrcMouseXterm"
                  Before="VimrcMouseXterm"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Mouse behavior (the Unix way).\rbehave xterm\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
-      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = "xterm"]]>
-    </SetProperty>
+                 Value="&quot;[INSTALLDIR]vim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Mouse behavior (the Unix way).\rbehave xterm\r\r&amp;/g&quot; -c wq &quot;[VimFolder]_vimrc&quot;" />
     <CustomAction Id="VimrcMouseXterm"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                  DllEntry="WixQuietExec"
                   Execute="deferred"
                   Return="check"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
     <SetProperty Id="VimrcMouseWindows"
                  Before="VimrcMouseWindows"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Mouse behavior (the Windows way).\rbehave mswin\r\r&amp;/g&quot; -c wq &quot;[Vim]_vimrc&quot;">
-      <![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = "windows"]]>
-    </SetProperty>
+                 Value="&quot;[INSTALLDIR]vim.exe&quot; -N -u NONE -i NONE -n -es -c &quot;1s/.*/&quot;&quot;&quot; Mouse behavior (the Windows way).\rbehave mswin\r\r&amp;/g&quot; -c wq &quot;[VimFolder]_vimrc&quot;" />
     <CustomAction Id="VimrcMouseWindows"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                  DllEntry="WixQuietExec"
                   Execute="deferred"
                   Return="check"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
-    <SetProperty Id="OleRegister"
-                 Before="OleRegister"
+    <SetProperty Id="OleRegisterInstall"
+                 Before="OleRegisterInstall"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -silent -register"><![CDATA[NOT Installed]]></SetProperty>
-    <CustomAction Id="OleRegister"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -silent -register" />
+    <CustomAction Id="OleRegisterInstall"
+                  DllEntry="WixQuietExec"
                   Execute="deferred"
                   Return="check"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
     <SetProperty Id="OleRegisterRollback"
                  Before="OleRegisterRollback"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -silent -unregister"><![CDATA[Installed]]></SetProperty>
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -silent -unregister"/>
     <CustomAction Id="OleRegisterRollback"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                  DllEntry="WixQuietExec"
                   Execute="rollback"
                   Return="ignore"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
-    <SetProperty Id="OleUnRegister"
-                 Before="OleUnRegister"
+    <SetProperty Id="OleRegisterUninstall"
+                 Before="OleRegisterUninstall"
                  Sequence="execute"
-                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -silent -unregister"><![CDATA[Installed]]></SetProperty>
-    <CustomAction Id="OleUnRegister"
-                  BinaryKey="WixCA"
-                  DllEntry="WixQuietExec64"
+                 Value="&quot;[INSTALLDIR]gvim.exe&quot; -silent -unregister" />
+    <CustomAction Id="OleRegisterUninstall"
+                  DllEntry="WixQuietExec"
                   Execute="deferred"
                   Return="ignore"
-                  Impersonate="no" />
+                  Impersonate="no"
+                  BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
     <InstallExecuteSequence>
-      <Custom Action="VimrcBehaviorCompatible" After="VimrcMappings"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "compatible"]]></Custom>
-      <Custom Action="VimrcBehaviorOriginal" After="VimrcBehaviorCompatible"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "original"]]></Custom>
-      <Custom Action="VimrcBehaviorDefault" After="VimrcBehaviorOriginal"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "default"]]></Custom>
-      <Custom Action="VimrcBehaviorEnhanced" After="VimrcBehaviorDefault"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = "enhanced"]]></Custom>
-      <Custom Action="VimrcMappings" After="VimrcMouseWindows"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MAPPINGS = "windows"]]></Custom>
-      <Custom Action="VimrcMouseXterm" After="InstallFiles"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = "xterm"]]></Custom>
-      <Custom Action="VimrcMouseWindows" After="VimrcMouseXterm"><![CDATA[NOT Installed AND (&DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = "windows"]]></Custom>
-      <Custom Action="OleRegister" After="InstallFiles"><![CDATA[NOT Installed]]></Custom>
-      <Custom Action="OleRegisterRollback" After="InstallFiles"><![CDATA[NOT Installed]]></Custom>
-      <Custom Action="OleUnRegister" Before="RemoveFiles"><![CDATA[Installed]]></Custom>
+      <Custom Action="VimrcBehaviorCompatible"
+              After="InstallFiles"
+              Condition="NOT Installed AND (&amp;DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = &quot;compatible&quot;" />
+      <Custom Action="VimrcBehaviorOriginal"
+              After="VimrcBehaviorCompatible"
+              Condition="NOT Installed AND (&amp;DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = &quot;original&quot;" />
+      <Custom Action="VimrcBehaviorDefault"
+              After="VimrcBehaviorOriginal"
+              Condition="NOT Installed AND (&amp;DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = &quot;default&quot;" />
+      <Custom Action="VimrcBehaviorEnhanced"
+              After="VimrcBehaviorDefault"
+              Condition="NOT Installed AND (&amp;DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = &quot;enhanced&quot;" />
+      <Custom Action="VimrcMappings"
+              After="VimrcBehaviorEnhanced"
+              Condition="NOT Installed AND (&amp;DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MAPPINGS = &quot;windows&quot;" />
+      <Custom Action="VimrcMouseXterm"
+              After="VimrcMappings"
+              Condition="NOT Installed AND (&amp;DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = &quot;xterm&quot;" />
+      <Custom Action="VimrcMouseWindows"
+              After="VimrcMouseXterm"
+              Condition="NOT Installed AND (&amp;DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = &quot;windows&quot;" />
+      <Custom Action="OleRegisterRollback"
+              After="InstallFiles"
+              Condition="NOT Installed" />
+      <Custom Action="OleRegisterInstall"
+              After="OleRegisterRollback"
+              Condition="NOT Installed" />
+      <Custom Action="OleRegisterUninstall"
+              Before="RemoveFiles"
+              Condition="Installed" />
     </InstallExecuteSequence>
 
     <UI>
-      <UIRef Id="WixUI_FeatureTree" />
+      <ui:WixUI Id="WixUI_FeatureTree" />
       <UIRef Id="CustomDlg" />
     </UI>
-    <UIRef Id="WixUI_ErrorProgressText" />
-  </Product>
+  </Package>
 
   <Fragment>
     <UI Id="CustomDlg">
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="CustomizeDlg" Order="2">NOT Installed</Publish>
-
-      <Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="3">NOT Installed</Publish>
-      <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg"><![CDATA[&DefaultVimrc <> 3]]></Publish>
-      <Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="VimrcDlg"><![CDATA[&DefaultVimrc = 3]]></Publish>
-
-      <Publish Dialog="VimrcDlg" Control="Back" Event="NewDialog" Value="CustomizeDlg">1</Publish>
-      <Publish Dialog="VimrcDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="CustomizeDlg" Order="1"><![CDATA[(NOT Installed OR WixUI_InstallMode = "Change") AND &DefaultVimrc <> 3]]></Publish>
-      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="VimrcDlg" Order="1"><![CDATA[(NOT Installed OR WixUI_InstallMode = "Change") AND &DefaultVimrc = 3]]></Publish>
-
-      <Dialog Id="VimrcDlg" Width="370" Height="270" Title="[ProductName] Setup">
-        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
-        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
-        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
-          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+      <Publish Dialog="WelcomeDlg"
+               Control="Next"
+               Event="NewDialog"
+               Value="CustomizeDlg"
+               Order="2"
+               Condition="NOT Installed" />
+      <Publish Dialog="CustomizeDlg"
+               Control="Back"
+               Event="NewDialog"
+               Value="WelcomeDlg"
+               Order="3"
+               Condition="NOT Installed" />
+      <Publish Dialog="CustomizeDlg"
+               Control="Next"
+               Event="NewDialog"
+               Value="VerifyReadyDlg"
+               Condition="&amp;DefaultVimrc &lt;&gt; 3" />
+      <Publish Dialog="CustomizeDlg"
+               Control="Next"
+               Event="NewDialog"
+               Value="VimrcDlg"
+               Condition="&amp;DefaultVimrc = 3" />
+      <Publish Dialog="VimrcDlg"
+               Control="Back"
+               Event="NewDialog"
+               Value="CustomizeDlg" />
+      <Publish Dialog="VimrcDlg"
+               Control="Next"
+               Event="NewDialog"
+               Value="VerifyReadyDlg" />
+      <Publish Dialog="VerifyReadyDlg"
+               Control="Back"
+               Event="NewDialog"
+               Value="CustomizeDlg"
+               Order="1"
+               Condition="(NOT Installed OR WixUI_InstallMode = &quot;Change&quot;) AND &amp;DefaultVimrc &lt;&gt; 3" />
+      <Publish Dialog="VerifyReadyDlg"
+               Control="Back"
+               Event="NewDialog"
+               Value="VimrcDlg"
+               Order="1"
+               Condition="(NOT Installed OR WixUI_InstallMode = &quot;Change&quot;) AND &amp;DefaultVimrc = 3" />
+      <Dialog Id="VimrcDlg"
+              Width="370"
+              Height="270"
+              Title="[ProductName] Setup">
+        <Control Id="Back"
+                 Type="PushButton"
+                 X="180"
+                 Y="243"
+                 Width="56"
+                 Height="17"
+                 Text="!(loc.WixUIBack)" />
+        <Control Id="Next"
+                 Type="PushButton"
+                 X="236"
+                 Y="243"
+                 Width="56"
+                 Height="17"
+                 Default="yes"
+                 Text="!(loc.WixUINext)" />
+        <Control Id="Cancel"
+                 Type="PushButton"
+                 X="304"
+                 Y="243"
+                 Width="56"
+                 Height="17"
+                 Cancel="yes"
+                 Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog"
+                   Value="CancelDlg" />
         </Control>
-        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="WixUI_Bmp_Banner" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
-        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="Vimrc Configuration" />
-
-        <Control Id="BehaviorGroupBox" Type="GroupBox" X="10" Y="50"  Width="350" Height="55" Text="Vi / Vim behavior" />
-        <Control Id="BehaviorText" Type="Text" X="20" Y="63" Width="300" Height="10" Text="Compatibility and enhancements" />
-        <Control Id="BehaviorComboBox" Type="ComboBox" X="40" Y="80" Width="290" Height="50" ComboList="yes" Sorted="yes" Property="VIMRC_BEHAVIOR">
+        <Control Id="BannerBitmap"
+                 Type="Bitmap"
+                 X="0"
+                 Y="0"
+                 Width="370"
+                 Height="44"
+                 TabSkip="no"
+                 Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine"
+                 Type="Line"
+                 X="0"
+                 Y="44"
+                 Width="370"
+                 Height="0" />
+        <Control Id="BottomLine"
+                 Type="Line"
+                 X="0"
+                 Y="234"
+                 Width="370"
+                 Height="0" />
+        <Control Id="Title"
+                 Type="Text"
+                 X="15"
+                 Y="6"
+                 Width="200"
+                 Height="15"
+                 Transparent="yes"
+                 NoPrefix="yes"
+                 Text="Vimrc Configuration" />
+        <Control Id="BehaviorGroupBox"
+                 Type="GroupBox"
+                 X="10"
+                 Y="50"
+                 Width="350"
+                 Height="55"
+                 Text="Vi / Vim behavior" />
+        <Control Id="BehaviorText"
+                 Type="Text"
+                 X="20"
+                 Y="63"
+                 Width="300"
+                 Height="10"
+                 Text="Compatibility and enhancements" />
+        <Control Id="BehaviorComboBox"
+                 Type="ComboBox"
+                 X="40"
+                 Y="80"
+                 Width="290"
+                 Height="50"
+                 ComboList="yes"
+                 Sorted="yes"
+                 Property="VIMRC_BEHAVIOR">
           <ComboBox Property="VIMRC_BEHAVIOR">
-            <ListItem Text="Vi compatible" Value="compatible" />
-            <ListItem Text="Vim original" Value="original" />
-            <ListItem Text="Vim with some enhancements (load defaults.vim)" Value="default" />
-            <ListItem Text="Vim with all enhancements (load vimrc_example.vim)" Value="enhanced" />
+            <ListItem Text="Vi compatible"
+                      Value="compatible" />
+            <ListItem Text="Vim original"
+                      Value="original" />
+            <ListItem Text="Vim with some enhancements (load defaults.vim)"
+                      Value="default" />
+            <ListItem Text="Vim with all enhancements (load vimrc_example.vim)"
+                      Value="enhanced" />
           </ComboBox>
         </Control>
-
-        <Control Id="MappingsGroupBox" Type="GroupBox" X="10" Y="110" Width="350" Height="55" Text="Mappings" />
-        <Control Id="MappingsText" Type="Text" X="20" Y="123" Width="300" Height="10" Text="Remap a few keys for Windows (Ctrl-V, Ctrl-C, Ctrl-A, Ctrl-S, Ctrl-F, etc)" />
-        <Control Id="MappingsComboBox" Type="ComboBox" X="40" Y="140" Width="290" Height="50" ComboList="yes" Sorted="yes" Property="VIMRC_MAPPINGS">
+        <Control Id="MappingsGroupBox"
+                 Type="GroupBox"
+                 X="10"
+                 Y="110"
+                 Width="350"
+                 Height="55"
+                 Text="Mappings" />
+        <Control Id="MappingsText"
+                 Type="Text"
+                 X="20"
+                 Y="123"
+                 Width="300"
+                 Height="10"
+                 Text="Remap a few keys for Windows (Ctrl-V, Ctrl-C, Ctrl-A, Ctrl-S, Ctrl-F, etc)" />
+        <Control Id="MappingsComboBox"
+                 Type="ComboBox"
+                 X="40"
+                 Y="140"
+                 Width="290"
+                 Height="50"
+                 ComboList="yes"
+                 Sorted="yes"
+                 Property="VIMRC_MAPPINGS">
           <ComboBox Property="VIMRC_MAPPINGS">
-            <ListItem Text="Do not remap keys" Value="default" />
-            <ListItem Text="Remap a few keys" Value="windows" />
+            <ListItem Text="Do not remap keys"
+                      Value="default" />
+            <ListItem Text="Remap a few keys"
+                      Value="windows" />
           </ComboBox>
         </Control>
-
-        <Control Id="MouseGroupBox" Type="GroupBox" X="10" Y="170" Width="350" Height="55" Text="Mouse" />
-        <Control Id="MouseText" Type="Text" X="20" Y="183" Width="300" Height="10" Text="Behavior of right and left buttons" />
-        <Control Id="MouseComboBox" Type="ComboBox" X="40" Y="200" Width="290" Height="50" ComboList="yes" Sorted="yes" Property="VIMRC_MOUSE">
+        <Control Id="MouseGroupBox"
+                 Type="GroupBox"
+                 X="10"
+                 Y="170"
+                 Width="350"
+                 Height="55"
+                 Text="Mouse" />
+        <Control Id="MouseText"
+                 Type="Text"
+                 X="20"
+                 Y="183"
+                 Width="300"
+                 Height="10"
+                 Text="Behavior of right and left buttons" />
+        <Control Id="MouseComboBox"
+                 Type="ComboBox"
+                 X="40"
+                 Y="200"
+                 Width="290"
+                 Height="50"
+                 ComboList="yes"
+                 Sorted="yes"
+                 Property="VIMRC_MOUSE">
           <ComboBox Property="VIMRC_MOUSE">
-            <ListItem Text="Right: popup menu, Left: visual mode (default)" Value="default" />
-            <ListItem Text="Right: popup menu, Left: select mode (Windows)" Value="windows" />
-            <ListItem Text="Right: extends selection, Left: visual mode (Unix)" Value="xterm" />
+            <ListItem Text="Right: popup menu, Left: visual mode (default)"
+                      Value="default" />
+            <ListItem Text="Right: popup menu, Left: select mode (Windows)"
+                      Value="windows" />
+            <ListItem Text="Right: extends selection, Left: visual mode (Unix)"
+                      Value="xterm" />
           </ComboBox>
         </Control>
       </Dialog>
@@ -269,47 +408,49 @@
   </Fragment>
 
   <Fragment>
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="DesktopFolder" SourceName="Desktop" />
-      <Directory Id="ProgramFiles64Folder">
-        <Directory Id="Vim" Name="vim" >
-          <Directory Id="INSTALLDIR" Name="vim$(var.ProductVersionMajor)$(var.ProductVersionMinor)" />
-        </Directory>
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="VimFolder"
+                 Name="vim">
+        <Directory Id="INSTALLDIR"
+                   Name="vim$(var.ProductVersionMajor)$(var.ProductVersionMinor)" />
       </Directory>
-      <Directory Id="ProgramMenuFolder">
-        <Directory Id="ProgramMenuFolderApplication" Name="Vim $(var.ProductVersionMajor).$(var.ProductVersionMinor)" />
-      </Directory>
-    </Directory>
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ProgramMenuApplicationFolder"
+                 Name="Vim $(var.ProductVersionMajor).$(var.ProductVersionMinor)" />
+    </StandardDirectory>
   </Fragment>
 
   <Fragment>
-    <DirectoryRef Id="Vim">
-      <Component Id="DefaultVimrcComponent" Guid="*">
-        <File Id="fil30026CAE7DF1D1F6F3496B2C32AF0DED" KeyPath="yes" Source="$(var.SrcDirectory)\_vimrc" />
+    <DirectoryRef Id="VimFolder">
+      <Component Id="DefaultVimrcComponent">
+        <File Id="fil30026CAE7DF1D1F6F3496B2C32AF0DED"
+              KeyPath="yes"
+              Source="$(var.SrcDirectory)\_vimrc" />
       </Component>
     </DirectoryRef>
   </Fragment>
 
   <Fragment>
-    <DirectoryRef Id="DesktopFolder">
-      <Component Id="DesktopShortcutsComponent" Guid="*">
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="DesktopShortcutsComponent">
         <Shortcut Id="DesktopShortcutsComponent.gVim"
                   Name="gVim $(var.ProductVersionMajor).$(var.ProductVersionMinor)"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="DesktopShortcutsComponent.gVim.Easy"
                   Name="gVim Easy $(var.ProductVersionMajor).$(var.ProductVersionMinor)"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-y"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="DesktopShortcutsComponent.gVim.ReadOnly"
                   Name="gVim Read only $(var.ProductVersionMajor).$(var.ProductVersionMinor)"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-R"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <RegistryValue Root="HKCU"
                        Key="Software\[Manufacturer]\[ProductName] [ProductVersion]"
                        Name="DesktopShortcutsComponent"
@@ -317,69 +458,69 @@
                        Value="1"
                        KeyPath="yes" />
       </Component>
-    </DirectoryRef>
+    </StandardDirectory>
   </Fragment>
 
   <Fragment>
-    <DirectoryRef Id="ProgramMenuFolderApplication">
-      <Component Id="StartMenuShortcutsComponent" Guid="*">
+    <DirectoryRef Id="ProgramMenuApplicationFolder">
+      <Component Id="StartMenuShortcutsComponent">
         <Shortcut Id="StartMenuShortcutsComponent.gVim.Diff"
                   Name="gVim Diff"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-d"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="StartMenuShortcutsComponent.gVim.Easy"
                   Name="gVim Easy"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-y"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="StartMenuShortcutsComponent.gVim.ReadOnly"
                   Name="gVim Read-only"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-R"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="StartMenuShortcutsComponent.gVim"
                   Name="gVim"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="StartMenuShortcutsComponent.gVim.Help"
                   Name="gVim Help"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]gvim.exe"
                   Arguments="-c H"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="StartMenuShortcutsComponent.Vim.Diff"
                   Name="Vim Diff"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]vim.exe"
                   Arguments="-d"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="StartMenuShortcutsComponent.Vim.Tutor"
                   Name="Vim tutor"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]vimtutor.bat"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="StartMenuShortcutsComponent.Vim"
                   Name="Vim"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]vim.exe"
-                  WorkingDirectory="HomeDrivePath" />
+                  WorkingDirectory="INSTALLDIR" />
         <Shortcut Id="StartMenuShortcutsComponent.Vim.ReadOnly"
                   Name="Vim Read-only"
                   Description="Vi Improved - A Text Editor"
                   Target="[INSTALLDIR]vim.exe"
                   Arguments="-R"
-                  WorkingDirectory="HomeDrivePath" />
-        <Shortcut Id="StartMenuShortcutsComponent.VimOnline"
-                  Name="Vim Online"
-                  Description="Vim Online"
-                  Icon="gvim"
-                  Target="[Url]" />
-        <RemoveFolder Id="ProgramMenuFolderApplication" On="uninstall" />
+                  WorkingDirectory="INSTALLDIR" />
+        <util:InternetShortcut Id="StartMenuShortcutsComponent.VimOnline"
+                               Name="Vim Online"
+                               Type="url"
+                               Target="[Url]"/>
+        <RemoveFolder Id="ProgramMenuApplicationFolder"
+                      On="uninstall" />
         <RegistryValue Root="HKCU"
                        Key="Software\[Name]\[ProductName] [ProductVersion]"
                        Name="StartMenuShortcutsComponent"
@@ -391,58 +532,78 @@
   </Fragment>
 
   <Fragment>
-    <DirectoryRef Id="INSTALLDIR">
-      <Component Id="RegistryComponent" Guid="1096A971-8841-432E-9346-B71D1731D51A" KeyPath="yes">
-        <RegistryKey Id='Registry.Entry.Clsid.default'
-                     Root='HKCR'
-                     Key='CLSID\{51EEE242-AD87-11d3-9C1E-0090278BBD99}'
-                     ForceCreateOnInstall='yes'
-                     ForceDeleteOnUninstall='yes'>
-          <RegistryValue Type='string' Value='Vim Shell Extension' />
-        </RegistryKey>
-        <RegistryKey Id='Registry.Entry.Clsid.InProcServer32'
-                     Root='HKCR'
-                     Key='CLSID\{51EEE242-AD87-11d3-9C1E-0090278BBD99}\InProcServer32'
-                     ForceCreateOnInstall='yes'
-                     ForceDeleteOnUninstall='yes'>
-          <RegistryValue Type="string" Value="[INSTALLDIR]GvimExt64\gvimext.dll" />
-          <RegistryValue Type='string' Name='ThreadingModel' Value='Apartment' />
-        </RegistryKey>
-        <RegistryKey Id='Registry.Entry.ShellEx.ContextMenuHandlers'
-                     Root='HKCR'
-                     Key='*\shellex\ContextMenuHandlers\gvim'
-                     ForceCreateOnInstall='yes'
-                     ForceDeleteOnUninstall='yes'>
-          <RegistryValue Type='string' Value='{51EEE242-AD87-11d3-9C1E-0090278BBD99}' />
-        </RegistryKey>
-        <RegistryKey Id='Registry.Entry.ShellExtensions.Approved'
-                     Root='HKLM'
-                     Key='SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved'
-                     ForceCreateOnInstall='yes'
-                     ForceDeleteOnUninstall='yes'>
-          <RegistryValue Type='string' Name='{51EEE242-AD87-11d3-9C1E-0090278BBD99}' Value='Vim Shell Extension' />
-        </RegistryKey>
-        <RegistryKey Id='Registry.Entry.Clsid.Software'
-                     Root='HKLM'
-                     Key='SOFTWARE\Vim\Gvim'
-                     ForceCreateOnInstall='yes'
-                     ForceDeleteOnUninstall='yes'>
-          <RegistryValue Type='string' Name='path' Value='[INSTALLDIR]gvim.exe' />
-        </RegistryKey>
+    <?if $(sys.BUILDARCH) ~= "x86" ?>
+      <?define GvimExtFolder = "GvimExt32" ?>
+    <?elseif $(sys.BUILDARCH) ~= "x64" ?>
+      <?define GvimExtFolder = "GvimExt64" ?>
+    <?else?>
+      <?error Unsupported architecture: $(sys.BUILDARCH) ?>
+    <?endif?>
 
-        <RegistryKey Id='Registry.Open.With'
-                     Root='HKCR'
-                     Key='*\OpenWithList\gvim.exe'
-                     ForceCreateOnInstall='yes'
-                     ForceDeleteOnUninstall='yes'>
-          <RegistryValue Type='string' Value='' />
+    <DirectoryRef Id="INSTALLDIR">
+      <Component Id="RegistryComponent"
+                 Guid="1096A971-8841-432E-9346-B71D1731D51A"
+                 KeyPath="yes">
+        <RegistryKey Id="Registry.Entry.Clsid.default"
+                     Root="HKCR"
+                     Key="CLSID\{51EEE242-AD87-11d3-9C1E-0090278BBD99}"
+                     ForceCreateOnInstall="yes"
+                     ForceDeleteOnUninstall="yes">
+          <RegistryValue Type="string"
+                         Value="Vim Shell Extension" />
         </RegistryKey>
-        <RegistryKey Id='Registry.Entry.EditCommand'
-                     Root='HKCR'
-                     Key='Applications\gvim.exe\shell\edit\command'
-                     ForceCreateOnInstall='yes'
-                     ForceDeleteOnUninstall='yes'>
-          <RegistryValue Type='string' Value='"[INSTALLDIR]gvim.exe" "%1"' />
+        <RegistryKey Id="Registry.Entry.Clsid.InProcServer32"
+                     Root="HKCR"
+                     Key="CLSID\{51EEE242-AD87-11d3-9C1E-0090278BBD99}\InProcServer32"
+                     ForceCreateOnInstall="yes"
+                     ForceDeleteOnUninstall="yes">
+          <RegistryValue Type="string"
+                         Value="[INSTALLDIR]$(var.GvimExtFolder)\gvimext.dll" />
+          <RegistryValue Type="string"
+                         Name="ThreadingModel"
+                         Value="Apartment" />
+        </RegistryKey>
+        <RegistryKey Id="Registry.Entry.ShellEx.ContextMenuHandlers"
+                     Root="HKCR"
+                     Key="*\shellex\ContextMenuHandlers\gvim"
+                     ForceCreateOnInstall="yes"
+                     ForceDeleteOnUninstall="yes">
+          <RegistryValue Type="string"
+                         Value="{51EEE242-AD87-11d3-9C1E-0090278BBD99}" />
+        </RegistryKey>
+        <RegistryKey Id="Registry.Entry.ShellExtensions.Approved"
+                     Root="HKLM"
+                     Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved"
+                     ForceCreateOnInstall="yes"
+                     ForceDeleteOnUninstall="yes">
+          <RegistryValue Type="string"
+                         Name="{51EEE242-AD87-11d3-9C1E-0090278BBD99}"
+                         Value="Vim Shell Extension" />
+        </RegistryKey>
+        <RegistryKey Id="Registry.Entry.Clsid.Software"
+                     Root="HKLM"
+                     Key="SOFTWARE\Vim\Gvim"
+                     ForceCreateOnInstall="yes"
+                     ForceDeleteOnUninstall="yes">
+          <RegistryValue Type="string"
+                         Name="path"
+                         Value="[INSTALLDIR]gvim.exe" />
+        </RegistryKey>
+        <RegistryKey Id="Registry.Open.With"
+                     Root="HKCR"
+                     Key="*\OpenWithList\gvim.exe"
+                     ForceCreateOnInstall="yes"
+                     ForceDeleteOnUninstall="yes">
+          <RegistryValue Type="string"
+                         Value="" />
+        </RegistryKey>
+        <RegistryKey Id="Registry.Entry.EditCommand"
+                     Root="HKCR"
+                     Key="Applications\gvim.exe\shell\edit\command"
+                     ForceCreateOnInstall="yes"
+                     ForceDeleteOnUninstall="yes">
+          <RegistryValue Type="string"
+                         Value="&quot;[INSTALLDIR]gvim.exe&quot; &quot;%1&quot;" />
         </RegistryKey>
       </Component>
     </DirectoryRef>

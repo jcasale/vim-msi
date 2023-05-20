@@ -2,7 +2,7 @@ name: build
 
 on:
   schedule:
-    - cron:  '42 6 * * *'
+    - cron: "42 6 * * *"
 
   workflow_dispatch:
 
@@ -27,6 +27,7 @@ jobs:
       - name: Get downstream tag
         uses: oprypin/find-latest-tag@v1
         id: downstream_tag
+        continue-on-error: true
         with:
           repository: ${{ github.repository }}
 
@@ -38,7 +39,16 @@ jobs:
         shell: pwsh
         run: |
           $upstreamVersion = [Version]::new('${{ steps.upstream_tag.outputs.tag }}'.TrimStart('v'))
-          $downstreamVersion = [Version]::new('${{ steps.downstream_tag.outputs.tag }}'.TrimStart('v'))
+
+          if ('${{ steps.downstream_tag.outputs.tag }}')
+          {
+            $downstreamVersion = [Version]::new('${{ steps.downstream_tag.outputs.tag }}'.TrimStart('v'))
+          }
+          else
+          {
+            $downstreamVersion = [Version]::new()
+          }
+
           if ($upstreamVersion -gt $downstreamVersion)
           {
             echo 'Build is required.'
@@ -68,38 +78,95 @@ jobs:
           echo "versionBuild=$($version.Build)" >> $env:GITHUB_OUTPUT
 
       - name: Setup wix
-        run: echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" |Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        run: |
+          dotnet.exe tool install --global wix
+
+          wix.exe extension add WixToolset.UI.wixext --global
+          wix.exe extension add WixToolset.Util.wixext --global
+
+          Invoke-RestMethod -Uri https://www.nuget.org/api/v2/package/WixToolset.Heat -OutFile .\WixToolset.Heat.nupkg -ErrorAction Stop
+          Expand-Archive .\WixToolset.Heat.nupkg -DestinationPath .\heat -ErrorAction Stop
+          Get-ChildItem -Path .\heat -Recurse |
+            Where-Object { $_.FullName.EndsWith('x64\heat.exe') } |
+            Select-Object -ExpandProperty DirectoryName |
+            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Download vim
-        run: |
-          gh.exe release download ${{ needs.check.outputs.tag }} --pattern '*_x64.zip' --repo vim/vim-win32-installer
-          Get-ChildItem
+        run: gh.exe release download ${{ needs.check.outputs.tag }} --pattern '*_x64.zip' --repo vim/vim-win32-installer
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract vim
-        run: |
-          New-Item -Name build -ItemType Directory -ErrorAction Stop
-          Expand-Archive -Path '*_x64.zip' -DestinationPath build -ErrorAction Stop
+        run: Expand-Archive -Path '*_x64.zip' -DestinationPath build -ErrorAction Stop
 
       - name: Prepare vim
         run: |
-          Remove-Item ./build/vim/vim*/GvimExt32/GvimExt.reg -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim*/GvimExt32/README.txt -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim*/GvimExt64/GvimExt.reg -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim*/GvimExt64/README.txt -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim*/install.exe -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim*/uninstall.exe -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim*/*.desktop -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/GvimExt32/GvimExt.reg -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/GvimExt32/README.txt -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/GvimExt64/GvimExt.reg -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/GvimExt64/README.txt -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/install.exe -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/uninstall.exe -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/*.desktop -Force -ErrorAction Stop
 
       - name: Harvest vim
-        run: heat.exe dir build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }} -nologo -cg ProductComponents -g1 -ag -ke -srd -dr INSTALLDIR -sfrag -sreg -var var.VimSource -o build\Fragment.wxs
+        run: |
+          heat.exe `
+            dir `
+            build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }} `
+            -nologo `
+            -cg ProductComponents `
+            -g1 `
+            -ag `
+            -ke `
+            -srd `
+            -dr INSTALLDIR `
+            -sfrag `
+            -sreg `
+            -var var.VimSource `
+            -o build\Fragment.wxs
 
-      - name: Compile vim
-        run: candle.exe -nologo -dVimSource=build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }} -dSrcDirectory=src -dProductVersion="${{ steps.version.outputs.version }}" -dProductVersionMajor="${{ steps.version.outputs.versionMajor }}" -dProductVersionMinor="${{ steps.version.outputs.versionMinor }}" -out build\ -arch x64 -ext WixUtilExtension.dll -ext WixUIExtension.dll build\Fragment.wxs src\Product.wxs
+      - name: Build msi
+        run: |
+          wix.exe `
+            build `
+            -arch x64 `
+            -src src\Product.wxs build\Fragment.wxs `
+            -d VimSource="build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}" `
+            -d SrcDirectory=src `
+            -d ProductVersion="${{ steps.version.outputs.version }}" `
+            -d ProductVersionMajor="${{ steps.version.outputs.versionMajor }}" `
+            -d ProductVersionMinor="${{ steps.version.outputs.versionMinor }}" `
+            -ext WixToolset.UI.wixext `
+            -ext WixToolset.Util.wixext `
+            -out vim.msi
 
-      - name: Link vim
-        run: light.exe -nologo -out vim.msi -ext WixUtilExtension.dll -ext WixUIExtension.dll -spdb build\Fragment.wixobj build\Product.wixobj
+      - name: Update msi
+        run: |
+          $path = Resolve-Path 'C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x86\msiinfo.exe' -ErrorAction Stop
+
+          & $path vim.msi -t "Vim for Windows" -o "Vim v${{ steps.version.outputs.version }}"
+
+      - name: Validate msi
+        run: wix.exe msi validate vim.msi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: vim-msi
+          path: ./vim.msi
+          if-no-files-found: error
+
+      - name: Test installer
+        run: |
+          $process = Start-Process msiexec.exe -ArgumentList '/i','vim.msi','/qn' -Wait -NoNewWindow -PassThru -ErrorAction Stop
+          if ($process.ExitCode -ne 0)
+          {
+              throw 'Non zero exit code: "{0}".' -f $process.ExitCode
+          }
+
+          $path = Join-Path $env:ProgramFiles 'vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}\vim.exe' -Resolve -ErrorAction Stop
+          & $path --version
 
       - name: Publish release
         uses: ncipollo/release-action@v1
