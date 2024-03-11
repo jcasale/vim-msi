@@ -79,14 +79,14 @@ jobs:
 
       - name: Setup wix
         run: |
-          dotnet.exe tool install --global wix
+          dotnet.exe tool install --global wix --version 4.0.4 --verbosity diag
 
-          wix.exe extension add WixToolset.UI.wixext --global
-          wix.exe extension add WixToolset.Util.wixext --global
+          wix.exe extension add WixToolset.UI.wixext/4.0.4 --global
+          wix.exe extension add WixToolset.Util.wixext/4.0.4 --global
+          wix.exe extension list --global
 
-          Invoke-RestMethod -Uri https://www.nuget.org/api/v2/package/WixToolset.Heat -OutFile .\WixToolset.Heat.nupkg -ErrorAction Stop
-          Expand-Archive .\WixToolset.Heat.nupkg -DestinationPath .\heat -ErrorAction Stop
-          Get-ChildItem -Path .\heat -Recurse |
+          nuget.exe install WixToolset.Heat -Version 4.0.4 -NonInteractive -Verbosity detailed
+          Get-ChildItem -Path .\WixToolset.Heat* -Recurse |
             Where-Object { $_.FullName.EndsWith('x64\heat.exe') } |
             Select-Object -ExpandProperty DirectoryName |
             Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
