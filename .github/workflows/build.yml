@@ -169,8 +169,7 @@ jobs:
           & $path --version
 
       - name: Publish release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: vim.msi
-          tag: ${{ needs.check.outputs.tag }}
-          body: Vim Windows x64 build packaged as an msi.
+        run: gh.exe release create ${{ needs.check.outputs.tag }} --notes 'Vim Windows x64 build packaged as an msi.' vim.msi
+        env:
+          # Requires a personal access token with a fine-grained permission of contents:read/write.
+          GH_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}

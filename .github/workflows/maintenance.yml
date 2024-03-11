@@ -17,4 +17,5 @@ jobs:
           keep_latest: 10
           delete_tags: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Requires a personal access token with a fine-grained permission of contents:read/write.
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
