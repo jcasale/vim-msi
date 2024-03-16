@@ -123,7 +123,7 @@ jobs:
             -dr INSTALLDIR `
             -sfrag `
             -sreg `
-            -var var.VimSource `
+            -var var.ProductSource `
             -o build\Fragment.wxs
 
       - name: Build msi
@@ -132,7 +132,7 @@ jobs:
             build `
             -arch x64 `
             -src src\Product.wxs build\Fragment.wxs `
-            -d VimSource="build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}" `
+            -d ProductSource="build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}" `
             -d SrcDirectory=src `
             -d ProductVersion="${{ steps.version.outputs.version }}" `
             -d ProductVersionMajor="${{ steps.version.outputs.versionMajor }}" `
