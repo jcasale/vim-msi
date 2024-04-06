@@ -7,7 +7,7 @@
            Version="$(var.ProductVersion)"
            Manufacturer="Bram Moolenaar et al."
            UpgradeCode="12b27f7b-6f45-4b2c-87ed-61c5008d643b">
-    <SummaryInformation Description="Vim is an advanced text editor that seeks to provide the power of the de-facto Unix editor 'Vi', with a more complete feature set." />
+    <SummaryInformation Description="Vim is an advanced text editor that seeks to provide the power of the de-facto Unix editor 'Vi', with a more complete feature set." Comments="Vim $(var.ProductVersion)" />
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <Media Id="1" Cabinet="Data.cab" EmbedCab="yes" CompressionLevel="high" />
     <Icon Id="gvim" SourceFile="$(var.ProductSource)\gvim.exe" />
@@ -485,6 +485,10 @@
         </Component>
       </Directory>
     </StandardDirectory>
+
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLDIR">
+      <Files Include="$(var.ProductSource)\**" />
+    </ComponentGroup>
 
     <StandardDirectory Id="ProgramMenuFolder">
       <Directory Id="ProgramMenuApplicationFolder"

@@ -79,17 +79,11 @@ jobs:
 
       - name: Setup wix
         run: |
-          dotnet.exe tool install --global wix --version 4.0.5 --verbosity diag
+          dotnet.exe tool install --global wix --version 5.0.0 --verbosity diag
 
-          wix.exe extension add WixToolset.UI.wixext/4.0.5 --global
-          wix.exe extension add WixToolset.Util.wixext/4.0.5 --global
+          wix.exe extension add WixToolset.UI.wixext/5.0.0 --global
+          wix.exe extension add WixToolset.Util.wixext/5.0.0 --global
           wix.exe extension list --global
-
-          nuget.exe install WixToolset.Heat -Version 4.0.5 -NonInteractive -Verbosity detailed
-          Get-ChildItem -Path .\WixToolset.Heat* -Recurse |
-            Where-Object { $_.FullName.EndsWith('x64\heat.exe') } |
-            Select-Object -ExpandProperty DirectoryName |
-            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Download vim
         run: gh.exe release download ${{ needs.check.outputs.tag }} --pattern '*_x64.zip' --repo vim/vim-win32-installer
@@ -109,43 +103,20 @@ jobs:
           Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/uninstall.exe -Force -ErrorAction Stop
           Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/*.desktop -Force -ErrorAction Stop
 
-      - name: Harvest vim
-        run: |
-          heat.exe `
-            dir `
-            build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }} `
-            -nologo `
-            -cg ProductComponents `
-            -g1 `
-            -ag `
-            -ke `
-            -srd `
-            -dr INSTALLDIR `
-            -sfrag `
-            -sreg `
-            -var var.ProductSource `
-            -o build\Fragment.wxs
-
       - name: Build msi
         run: |
           wix.exe `
             build `
             -arch x64 `
-            -src src\Product.wxs build\Fragment.wxs `
-            -d ProductSource="build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}" `
-            -d SrcDirectory=src `
+            -src src\Product.wxs `
+            -d ProductSource="$(Resolve-Path 'build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}')" `
+            -d SrcDirectory="$(Resolve-Path 'src')" `
             -d ProductVersion="${{ steps.version.outputs.version }}" `
             -d ProductVersionMajor="${{ steps.version.outputs.versionMajor }}" `
             -d ProductVersionMinor="${{ steps.version.outputs.versionMinor }}" `
             -ext WixToolset.UI.wixext `
             -ext WixToolset.Util.wixext `
             -out vim.msi
-
-      - name: Update msi
-        run: |
-          $path = Resolve-Path 'C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x86\msiinfo.exe' -ErrorAction Stop
-
-          & $path vim.msi -t "Vim for Windows" -o "Vim v${{ steps.version.outputs.version }}"
 
       - name: Validate msi
         run: wix.exe msi validate vim.msi
