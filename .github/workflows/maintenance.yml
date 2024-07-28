@@ -9,6 +9,7 @@ on:
 jobs:
   maintenance:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Delete Older Releases
