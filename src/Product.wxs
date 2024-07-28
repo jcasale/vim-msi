@@ -166,8 +166,14 @@
                   BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" />
 
     <InstallExecuteSequence>
-      <Custom Action="VimrcBehaviorCompatible"
+      <Custom Action="OleRegisterRollback"
               After="InstallFiles"
+              Condition="NOT Installed" />
+      <Custom Action="OleRegisterInstall"
+              After="OleRegisterRollback"
+              Condition="NOT Installed" />
+      <Custom Action="VimrcBehaviorCompatible"
+              After="OleRegisterInstall"
               Condition="NOT Installed AND (&amp;DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_BEHAVIOR = &quot;compatible&quot;" />
       <Custom Action="VimrcBehaviorOriginal"
               After="VimrcBehaviorCompatible"
@@ -187,12 +193,6 @@
       <Custom Action="VimrcMouseWindows"
               After="VimrcMouseXterm"
               Condition="NOT Installed AND (&amp;DefaultVimrc=3) AND NOT(!DefaultVimrc=3) AND VIMRC_MOUSE = &quot;windows&quot;" />
-      <Custom Action="OleRegisterRollback"
-              After="InstallFiles"
-              Condition="NOT Installed" />
-      <Custom Action="OleRegisterInstall"
-              After="OleRegisterRollback"
-              Condition="NOT Installed" />
       <Custom Action="OleRegisterUninstall"
               Before="RemoveFiles"
               Condition="Installed" />
