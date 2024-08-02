@@ -103,6 +103,7 @@ jobs:
           Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/GvimExt64/README.txt -Force -ErrorAction Stop
           Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/install.exe -Force -ErrorAction Stop
           Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/uninstall.exe -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/uninstall.txt -Force -ErrorAction Stop
           Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/*.desktop -Force -ErrorAction Stop
 
       - name: Build msi
