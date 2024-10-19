@@ -16,34 +16,46 @@ jobs:
 
     steps:
       - name: Get upstream tag
-        uses: oprypin/find-latest-tag@v1
-        id: upstream_tag
-        with:
-          repository: vim/vim-win32-installer
-          releases-only: true
+        id: upstream-tag
+        run: |
+          result=$(gh api graphql -f query='{repository(owner: "vim", name: "vim-win32-installer"){refs(refPrefix: "refs/tags/", last: 1){nodes{name}}}}' --jq '.data.repository.refs.nodes[].name')
 
-      - name: Upstream tag ${{ steps.upstream_tag.outputs.tag }}
-        run: echo "Upstream tag ${{ steps.upstream_tag.outputs.tag }}"
+          if [ $? -ne 0 ]
+          then
+            exit $?
+          fi
+
+          echo $result
+
+          echo "tag=$result" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Get downstream tag
-        uses: oprypin/find-latest-tag@v1
-        id: downstream_tag
-        continue-on-error: true
-        with:
-          repository: ${{ github.repository }}
+        id: downstream-tag
+        run: |
+          result=$(gh api graphql -f query='{repository(owner: "${{ github.repository_owner }}", name: "${{ github.event.repository.name }}"){refs(refPrefix: "refs/tags/", last: 1){nodes{name}}}}' --jq '.data.repository.refs.nodes[].name')
 
-      - name: Downstream tag ${{ steps.downstream_tag.outputs.tag }}
-        run: echo "Downstream tag ${{ steps.downstream_tag.outputs.tag }}"
+          if [ $? -ne 0 ]
+          then
+            exit $?
+          fi
+
+          echo $result
+
+          echo "tag=$result" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Result
         id: result
         shell: pwsh
         run: |
-          $upstreamVersion = [Version]::new('${{ steps.upstream_tag.outputs.tag }}'.TrimStart('v'))
+          $upstreamVersion = [Version]::new('${{ steps.upstream-tag.outputs.tag }}'.TrimStart('v'))
 
-          if ('${{ steps.downstream_tag.outputs.tag }}')
+          if ('${{ steps.downstream-tag.outputs.tag }}')
           {
-            $downstreamVersion = [Version]::new('${{ steps.downstream_tag.outputs.tag }}'.TrimStart('v'))
+            $downstreamVersion = [Version]::new('${{ steps.downstream-tag.outputs.tag }}'.TrimStart('v'))
           }
           else
           {
@@ -53,7 +65,7 @@ jobs:
           if ($upstreamVersion -gt $downstreamVersion)
           {
             echo 'Build is required.'
-            "tag=${{ steps.upstream_tag.outputs.tag }}" >> $env:GITHUB_OUTPUT
+            "tag=${{ steps.upstream-tag.outputs.tag }}" >> $env:GITHUB_OUTPUT
           }
           else
           {
