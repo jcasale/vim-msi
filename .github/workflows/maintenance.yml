@@ -13,10 +13,33 @@ jobs:
 
     steps:
       - name: Delete Older Releases
-        uses: dev-drprasad/delete-older-releases@v0.3.4
-        with:
-          keep_latest: 10
-          delete_tags: true
+        shell: pwsh
+        run: |
+          try
+          {
+              $tags = [string[]](& gh release list --repo ${{ github.repository }} --json tagName --jq '.[] | .tagName')
+          }
+          catch
+          {
+              throw
+          }
+
+          $tags |
+              Select-Object @{l='tag';e={$_}},@{l='version';e={[version]::new($_.TrimStart('v'))}} |
+              Sort-Object version -Descending |
+              Select-Object -Skip 10 |
+              ForEach-Object {
+                  Write-Host ('Deleting "{0}".' -f $_.tag)
+
+                  try
+                  {
+                      & gh release delete $_.tag --repo ${{ github.repository }} --cleanup-tag --yes
+                  }
+                  catch
+                  {
+                      throw
+                  }
+              }
         env:
           # Requires a personal access token with a fine-grained permission of contents:read/write.
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
