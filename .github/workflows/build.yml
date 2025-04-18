@@ -93,10 +93,10 @@ jobs:
 
       - name: Setup wix
         run: |
-          dotnet.exe tool install --global wix --version 5.0.2 --verbosity diag
+          dotnet.exe tool install --global wix --version 6.0.0 --verbosity diag
 
-          wix.exe extension add WixToolset.UI.wixext/5.0.2 --global
-          wix.exe extension add WixToolset.Util.wixext/5.0.2 --global
+          wix.exe extension add WixToolset.UI.wixext/6.0.0 --global
+          wix.exe extension add WixToolset.Util.wixext/6.0.0 --global
           wix.exe extension list --global
 
       - name: Download vim
