@@ -18,7 +18,7 @@ jobs:
       - name: Get upstream tag
         id: upstream-tag
         run: |
-          result=$(gh api graphql -f query='{repository(owner: "vim", name: "vim-win32-installer"){refs(refPrefix: "refs/tags/", last: 1){nodes{name}}}}' --jq '.data.repository.refs.nodes[].name')
+          result=$(gh release list --repo vim/vim-win32-installer --limit 1 --exclude-drafts --json tagName --jq '.[] |.tagName')
 
           if [ $? -ne 0 ]
           then
@@ -34,7 +34,7 @@ jobs:
       - name: Get downstream tag
         id: downstream-tag
         run: |
-          result=$(gh api graphql -f query='{repository(owner: "${{ github.repository_owner }}", name: "${{ github.event.repository.name }}"){refs(refPrefix: "refs/tags/", last: 1){nodes{name}}}}' --jq '.data.repository.refs.nodes[].name')
+          result=$(gh release list --repo ${{ github.repository_owner }}/${{ github.event.repository.name }} --limit 1 --exclude-drafts --json tagName --jq '.[] |.tagName')
 
           if [ $? -ne 0 ]
           then
