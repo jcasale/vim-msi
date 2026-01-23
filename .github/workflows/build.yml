@@ -79,7 +79,7 @@ jobs:
     if: needs.check.outputs.tag != ''
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set version
         id: version
@@ -137,7 +137,7 @@ jobs:
         run: wix.exe msi validate vim.msi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: vim-msi
           path: ./vim.msi
