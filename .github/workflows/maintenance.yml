@@ -9,6 +9,8 @@ on:
 jobs:
   maintenance:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 5
 
     steps:
@@ -41,5 +43,4 @@ jobs:
                   }
               }
         env:
-          # Requires a personal access token with a fine-grained permission of contents:read/write.
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
