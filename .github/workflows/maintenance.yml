@@ -3,7 +3,6 @@ name: maintenance
 on:
   schedule:
     - cron: "42 7 * * *"
-
   workflow_dispatch:
 
 jobs:
@@ -17,16 +16,7 @@ jobs:
       - name: Delete Older Releases
         shell: pwsh
         run: |
-          try
-          {
-              $tags = [string[]](& gh release list --repo ${{ github.repository }} --json tagName --jq '.[] | .tagName')
-          }
-          catch
-          {
-              throw
-          }
-
-          $tags |
+          gh release list --repo ${{ github.repository }} --json tagName --jq '.[] | .tagName' |
               Select-Object @{l='tag';e={$_}},@{l='version';e={[version]::new($_.TrimStart('v'))}} |
               Sort-Object version -Descending |
               Select-Object -Skip 10 |
@@ -35,7 +25,7 @@ jobs:
 
                   try
                   {
-                      & gh release delete $_.tag --repo ${{ github.repository }} --cleanup-tag --yes
+                      gh release delete $_.tag --repo ${{ github.repository }} --cleanup-tag --yes
                   }
                   catch
                   {
