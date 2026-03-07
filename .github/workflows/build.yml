@@ -127,6 +127,7 @@ jobs:
             -src src\Product.wxs `
             -d ProductSource="$(Resolve-Path 'build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}')" `
             -d SrcDirectory="$(Resolve-Path 'src')" `
+            -d ProductTag="${{ needs.check.outputs.tag }}" `
             -d ProductVersion="${{ steps.version.outputs.version }}" `
             -d ProductVersionMajor="${{ steps.version.outputs.versionMajor }}" `
             -d ProductVersionMinor="${{ steps.version.outputs.versionMinor }}" `
