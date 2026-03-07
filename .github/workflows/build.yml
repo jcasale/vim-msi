@@ -3,7 +3,6 @@ name: build
 on:
   schedule:
     - cron: "42 6 * * *"
-
   workflow_dispatch:
 
 jobs:
@@ -12,73 +11,62 @@ jobs:
     timeout-minutes: 5
 
     outputs:
-      tag: ${{ steps.result.outputs.tag }}
+      tag: ${{ steps.remote-tag.outputs.value }}
+      publish: ${{ steps.publish.outputs.value }}
 
     steps:
-      - name: Get upstream tag
-        id: upstream-tag
+      - name: Get remote tag
+        id: remote-tag
         run: |
-          result=$(gh release list --repo vim/vim-win32-installer --limit 1 --exclude-drafts --json tagName --jq '.[] |.tagName')
+          tag=$(gh release list --repo vim/vim-win32-installer --limit 1 --exclude-drafts --json tagName --jq '.[] |.tagName')
 
           if [ $? -ne 0 ]
           then
             exit $?
           fi
 
-          echo $result
-
-          echo "tag=$result" >> "$GITHUB_OUTPUT"
+          echo "value=$tag" |tee -a "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get downstream tag
-        id: downstream-tag
+      - name: Get local tag
+        id: local-tag
         run: |
-          result=$(gh release list --repo ${{ github.repository_owner }}/${{ github.event.repository.name }} --limit 1 --exclude-drafts --json tagName --jq '.[] |.tagName')
+          tag=$(gh release list --repo ${{ github.repository_owner }}/${{ github.event.repository.name }} --limit 1 --exclude-drafts --json tagName --jq '.[] |.tagName')
 
           if [ $? -ne 0 ]
           then
             exit $?
           fi
 
-          echo $result
-
-          echo "tag=$result" >> "$GITHUB_OUTPUT"
+          echo "value=$tag" |tee -a "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Result
-        id: result
+      - name: Set publish condition
+        id: publish
         shell: pwsh
         run: |
-          $upstreamVersion = [Version]::new('${{ steps.upstream-tag.outputs.tag }}'.TrimStart('v'))
+          $remoteVersion = [Version]::new('${{ steps.remote-tag.outputs.value }}'.TrimStart('v'))
 
-          if ('${{ steps.downstream-tag.outputs.tag }}')
+          if ('${{ steps.local-tag.outputs.value }}')
           {
-            $downstreamVersion = [Version]::new('${{ steps.downstream-tag.outputs.tag }}'.TrimStart('v'))
+            $localVersion = [Version]::new('${{ steps.local-tag.outputs.value }}'.TrimStart('v'))
           }
           else
           {
-            $downstreamVersion = [Version]::new()
+            $localVersion = [Version]::new()
           }
 
-          if ($upstreamVersion -gt $downstreamVersion)
-          {
-            echo 'Build is required.'
-            "tag=${{ steps.upstream-tag.outputs.tag }}" >> $env:GITHUB_OUTPUT
-          }
-          else
-          {
-            echo 'Build not required.'
-          }
+          $required = $remoteVersion -gt $localVersion
+          'value={0}' -f $required |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
 
   build:
     runs-on: windows-latest
     permissions:
       contents: write
-    timeout-minutes: 20
+    timeout-minutes: 5
     needs: check
-    if: needs.check.outputs.tag != ''
 
     steps:
       - uses: actions/checkout@v6
@@ -86,12 +74,12 @@ jobs:
       - name: Set version
         id: version
         run: |
-          $tag = "${{ needs.check.outputs.tag }}".TrimStart("v")
+          $tag = '${{ needs.check.outputs.tag }}'.TrimStart('v')
           $version = [version]::new($tag)
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-          echo "versionMajor=$($version.Major)" >> $env:GITHUB_OUTPUT
-          echo "versionMinor=$($version.Minor)" >> $env:GITHUB_OUTPUT
-          echo "versionBuild=$($version.Build)" >> $env:GITHUB_OUTPUT
+          'version={0}' -f $version |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
+          'major={0}' -f $version.Major |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
+          'minor={0}' -f $version.Minor |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
+          'build={0}' -f $version.Build |Tee-Object -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Setup wix
         run: |
@@ -111,13 +99,13 @@ jobs:
 
       - name: Prepare vim
         run: |
-          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/GvimExt32/GvimExt.reg -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/GvimExt32/README.txt -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/GvimExt64/GvimExt.reg -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/GvimExt64/README.txt -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/install.exe -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/uninstall.exe -Force -ErrorAction Stop
-          Remove-Item ./build/vim/vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}/uninstall.txt -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.major }}${{ steps.version.outputs.minor }}/GvimExt32/GvimExt.reg -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.major }}${{ steps.version.outputs.minor }}/GvimExt32/README.txt -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.major }}${{ steps.version.outputs.minor }}/GvimExt64/GvimExt.reg -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.major }}${{ steps.version.outputs.minor }}/GvimExt64/README.txt -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.major }}${{ steps.version.outputs.minor }}/install.exe -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.major }}${{ steps.version.outputs.minor }}/uninstall.exe -Force -ErrorAction Stop
+          Remove-Item ./build/vim/vim${{ steps.version.outputs.major }}${{ steps.version.outputs.minor }}/uninstall.txt -Force -ErrorAction Stop
 
       - name: Build msi
         run: |
@@ -125,12 +113,12 @@ jobs:
             build `
             -arch x64 `
             -src src\Product.wxs `
-            -d ProductSource="$(Resolve-Path 'build\vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}')" `
+            -d ProductSource="$(Resolve-Path 'build\vim\vim${{ steps.version.outputs.major }}${{ steps.version.outputs.minor }}')" `
             -d SrcDirectory="$(Resolve-Path 'src')" `
             -d ProductTag="${{ needs.check.outputs.tag }}" `
             -d ProductVersion="${{ steps.version.outputs.version }}" `
-            -d ProductVersionMajor="${{ steps.version.outputs.versionMajor }}" `
-            -d ProductVersionMinor="${{ steps.version.outputs.versionMinor }}" `
+            -d ProductVersionMajor="${{ steps.version.outputs.major }}" `
+            -d ProductVersionMinor="${{ steps.version.outputs.minor }}" `
             -ext WixToolset.UI.wixext `
             -ext WixToolset.Util.wixext `
             -out vim.msi
@@ -139,9 +127,9 @@ jobs:
         run: wix.exe msi validate vim.msi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
-          name: vim-msi
+          archive: false
           path: ./vim.msi
           if-no-files-found: error
 
@@ -153,10 +141,11 @@ jobs:
               throw 'Non zero exit code: "{0}".' -f $process.ExitCode
           }
 
-          $path = Join-Path $env:ProgramFiles 'vim\vim${{ steps.version.outputs.versionMajor }}${{ steps.version.outputs.versionMinor }}\vim.exe' -Resolve -ErrorAction Stop
+          $path = Join-Path $env:ProgramFiles 'vim\vim${{ steps.version.outputs.major }}${{ steps.version.outputs.minor }}\vim.exe' -Resolve -ErrorAction Stop
           & $path --version
 
       - name: Publish release
-        run: gh.exe release create ${{ needs.check.outputs.tag }} --notes 'Vim Windows x64 build packaged as an msi.' vim.msi
+        if: needs.check.outputs.publish == 'True'
+        run: gh.exe release create ${{ needs.check.outputs.tag }} --title ${{ needs.check.outputs.tag }} --notes 'Vim Windows x64 build packaged as an msi.' vim.msi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
