@@ -355,7 +355,7 @@
                       Directory="ProgramMenuApplicationFolder"
                       On="uninstall" />
         <RegistryValue Root="HKCU"
-                       Key="Software\[Name]\[ProductName] [ProductVersion]"
+                       Key="Software\[ProductName]"
                        Name="StartMenuShortcutsComponent"
                        Type="integer"
                        Value="1"
@@ -383,7 +383,7 @@
                   Arguments="-R"
                   WorkingDirectory="INSTALLDIR" />
         <RegistryValue Root="HKCU"
-                       Key="Software\[Manufacturer]\[ProductName] [ProductVersion]"
+                       Key="Software\[ProductName]"
                        Name="DesktopShortcutsComponent"
                        Type="integer"
                        Value="1"
