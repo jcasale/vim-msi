@@ -25,7 +25,7 @@ jobs:
 
                   try
                   {
-                      gh release delete $_.tag --repo ${{ github.repository }} --cleanup-tag --yes
+                      gh release delete $_.tag --repo ${{ github.repository }} --yes
                   }
                   catch
                   {
