@@ -83,10 +83,10 @@ jobs:
 
       - name: Setup wix
         run: |
-          dotnet tool install wix --version 7.0.0 --global
+          dotnet tool install wix --version 7.0.1 --global
           wix eula accept wix7
-          wix extension add WixToolset.UI.wixext/7.0.0
-          wix extension add WixToolset.Util.wixext/7.0.0
+          wix extension add WixToolset.UI.wixext/7.0.1
+          wix extension add WixToolset.Util.wixext/7.0.1
 
       - name: Download vim
         run: gh.exe release download ${{ needs.check.outputs.tag }} --pattern '*_x64.zip' --repo vim/vim-win32-installer
